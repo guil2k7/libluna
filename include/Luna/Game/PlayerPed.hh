@@ -23,9 +23,9 @@ namespace Luna::Game {
             return &m_Pad;
         }
 
-    private:
-        void Initialise(int id);
+        void _Initialise(int id);
 
+    private:
         PADDING(8);
 
         int m_ID;

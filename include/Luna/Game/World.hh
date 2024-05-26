@@ -12,7 +12,7 @@ namespace Luna::Game {
         CWorld() = delete;
         ~CWorld() = delete;
 
-        inline static CPlayerInfo* Players() {
+        static inline CPlayerInfo* Players() {
             return *reinterpret_cast<CPlayerInfo**>(GameAddress + 0x6883C0);
         }
     };

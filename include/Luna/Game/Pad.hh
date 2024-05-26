@@ -40,5 +40,11 @@ namespace Luna::Game {
         inline bool IsKeyPressed(ePadKey key) const {
             return Keys & key;
         }
+
+        inline void Clear() {
+            UpDown = 0;
+            LeftRight = 0;
+            Keys = 0;
+        }
     };
 }

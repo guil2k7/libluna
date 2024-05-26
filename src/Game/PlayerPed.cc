@@ -3,7 +3,7 @@
 #include <Luna/Game/PlayerPed.hh>
 #include <Luna/Game/Pad.hh>
 #include <Luna/Game/World.hh>
-#include <Luna/Core/Hook.hh>
+#include <Luna/Core/MemoryExec.hh>
 
 using namespace Luna;
 using namespace Luna::Core;
@@ -11,36 +11,35 @@ using namespace Luna::Game;
 
 static struct {
     /// CPlayerPed::CPlayerPed()
-    CHook<CPlayerPed* (LUNA_THISCALL *)(CPlayerPed*, int, bool)> Constructor;
+    CFunction<CPlayerPed* (LUNA_THISCALL *)(CPlayerPed*, int, bool)> Constructor;
 
     /// CPlayerPed::ProcessControl()
-    CHook<void (LUNA_THISCALL *)(CPlayerPed*)> ProcessControl;
+    CFunction<void (LUNA_THISCALL *)(CPlayerPed*)> ProcessControl;
 
     /// CPlayerPed::GetPadFromPlayer()
-    CHook<CPlayerInfo* (LUNA_THISCALL *)(CPlayerPed*)> GetPlayerInfoForThisPlayerPed;
-} hook;
+    CFunction<CPlayerInfo* (LUNA_THISCALL *)(CPlayerPed*)> GetPlayerInfoForThisPlayerPed;
+} trampoline;
+
+static LUNA_THISCALL CPlayerPed* hook_Constructor(CPlayerPed* self, int id, bool groupCreated) {
+    trampoline.Constructor(self, id, groupCreated);
+
+    self->_Initialise(id);
+
+    return self;
+}
+
+static LUNA_THISCALL void hook_ProcessControl(CPlayerPed* self) {
+    return self->ProcessControl();
+}
+
+static LUNA_THISCALL CPlayerInfo* hook_GetPlayerInfoForThisPlayerPed(CPlayerPed* self) {
+    return &CWorld::Players()[self->ID()];
+}
 
 void CPlayerPed::InitialiseLuna() {
-    hook.Constructor.Hook(
-        GameAddress + 0x4D367D,
-        [](CPlayerPed* self, int id, bool groupCreated) {
-            hook.Constructor.Trampoline()(self, id, groupCreated);
-
-            self->Initialise(id);
-
-            return self;
-        }
-    );
-
-    hook.ProcessControl.Hook(
-        GameAddress + 0x4D47E9,
-        [](CPlayerPed* self) { return self->ProcessControl(); }
-    );
-
-    hook.GetPlayerInfoForThisPlayerPed.Hook(
-        GameAddress + 0x4D99CD,
-        [](CPlayerPed* self) { return &CWorld::Players()[self->m_ID]; }
-    );
+    MakeHook(&trampoline.Constructor, GameAddress + 0x4D367D, hook_Constructor);
+    MakeHook(&trampoline.ProcessControl, GameAddress + 0x4D47E9, hook_ProcessControl);
+    MakeHook(&trampoline.GetPlayerInfoForThisPlayerPed, GameAddress + 0x4D99CD, hook_GetPlayerInfoForThisPlayerPed);
 }
 
 CPlayerPed* CPlayerPed::Create(int id, bool groupCreated) {
@@ -62,7 +61,7 @@ void CPlayerPed::Destroy(CPlayerPed* instance) {
     ::operator delete(instance);
 }
 
-void CPlayerPed::Initialise(int id) {
+void CPlayerPed::_Initialise(int id) {
     m_ID = id;
 
     if (id == 0)
@@ -70,6 +69,9 @@ void CPlayerPed::Initialise(int id) {
 }
 
 void CPlayerPed::ProcessControl() {
+    if (m_ID == 0)
+        m_Pad.Clear();
+
     CPad::CurrentPad = &m_Pad;
-    hook.ProcessControl.Trampoline()(this);
+    trampoline.ProcessControl(this);
 }

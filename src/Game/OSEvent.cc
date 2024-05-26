@@ -5,30 +5,32 @@
 #include <Luna/Game/OSEvent.hh>
 #include <Luna/Game/Common.hh>
 #include <Luna/Game/imgui_impl_rw.hh>
-#include <Luna/Core/Hook.hh>
+#include <Luna/Core/MemoryExec.hh>
 
 using namespace Luna;
 using namespace Luna::Core;
 using namespace Luna::Game;
 
-static CHook<void (LUNA_STDCALL *)(eTouchAction, int, int, int)> hook_TouchEvent;
-static CHook<void (LUNA_STDCALL *)(bool, int, int, bool)> hook_KeyboardEvent;
+static struct {
+    CFunction<void (LUNA_STDCALL *)(eTouchAction, int, int, int)> TouchEvent;
+    CFunction<void (LUNA_STDCALL *)(bool, int, int, bool)> KeyboardEvent;
+} trampoline;
 
-static void AND_TouchEvent(eTouchAction action, int unknown, int x, int y) {
+static void hook_AND_TouchEvent(eTouchAction action, int unknown, int x, int y) {
     ImGui_ImplRW_ProcessTouchEvent(action, x, y);
 
-    hook_TouchEvent.Trampoline()(action, unknown, x, y);
+    trampoline.TouchEvent(action, unknown, x, y);
 }
 
-static void AND_KeyboardEvent(bool param1, int param2, int param3, bool param4) {
-    ImGui_ImplRW_ProcessKeyboardEvent(param2, param3 + 0xFFFFFFFF > 0, param1);
+// static void hook_AND_KeyboardEvent(bool param1, int param2, int param3, bool param4) {
+//     ImGui_ImplRW_ProcessKeyboardEvent(param2, param3 + 0xFFFFFFFF > 0, param1);
 
-    hook_KeyboardEvent.Trampoline()(param1, param2, param3, param4);
-}
+//     trampoline.KeyboardEvent(param1, param2, param3, param4);
+// }
 
 void OSEvents::InitialiseLuna() {
-    hook_TouchEvent.Hook(GameAddress + 0x279741, AND_TouchEvent);
-    // hook_KeyboardEvent.Hook(GameAddress + 0x2789DD, AND_KeyboardEvent);
+    MakeHook(&trampoline.TouchEvent, GameAddress + 0x279741, hook_AND_TouchEvent);
+    // MakeHook(&trampoline.KeyboardEvent, GameAddress + 0x2789DD, hook_AND_KeyboardEvent);
 }
 
 void OSEvents::ShowKeyboard() {

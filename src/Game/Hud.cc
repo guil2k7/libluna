@@ -3,23 +3,24 @@
 #include <Luna/Game/Hud.hh>
 #include <Luna/Game/Common.hh>
 #include <Luna/Game/Gui.hh>
-#include <Luna/Core/Hook.hh>
+#include <Luna/Core/MemoryExec.hh>
 
 using namespace Luna;
 using namespace Luna::Core;
 using namespace Luna::Game;
 
-static CHook<void (LUNA_THISCALL *)(CHud*)> hook_DrawAfterFade;
+static CFunction<void (LUNA_THISCALL *)(CHud*)> trampoline_DrawAfterFade;
 
+static void LUNA_THISCALL hook_DrawAfterFade(CHud* self) {
+    self->DrawAfterFade();
+}
+ 
 void CHud::InitialiseLuna() {
-    hook_DrawAfterFade.Hook(
-        GameAddress + 0x44A6A9,
-        [](CHud* self) { return self->DrawAfterFade(); }
-    );
-};
+    MakeHook(&trampoline_DrawAfterFade, GameAddress + 0x44A6A9, hook_DrawAfterFade);
+}
 
 void CHud::DrawAfterFade() {
-    hook_DrawAfterFade.Trampoline()(this);
+    trampoline_DrawAfterFade(this);
 
     CGui::Instance().Render();
 }

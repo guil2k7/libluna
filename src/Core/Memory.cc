@@ -1,7 +1,6 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
 
 #include <Luna/Core/Memory.hh>
-#include <cassert>
 #include <unistd.h>
 #include <sys/mman.h>
 
@@ -34,11 +33,14 @@ bool Core::ModifyMemoryProtection(void* address, size_t size, int flags) {
     return mprotect(pageStart, AlignValue(size, pageSize), osFlags) == 0;
 }
 
-void Core::MakeNop(void* address, size_t size) {
-    assert((size % 2) == 0);
+void* Core::AllocMemory(size_t size, int flags) {
+    return mmap(
+        nullptr, size, ConvertProtectionFlagsToOS(flags),
+        MAP_PRIVATE | MAP_ANONYMOUS,
+        0, 0
+    );
+}
 
-    size /= 2;
-
-    for (size_t i = 0; i < size; ++i)
-        reinterpret_cast<uint16_t*>(address)[i] = 0x46C0; // mov r8, r8
+void Core::ReleaseMemory(void* addr, size_t size) {
+    munmap(addr, size);
 }
