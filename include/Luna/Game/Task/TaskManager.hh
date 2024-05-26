@@ -11,9 +11,8 @@ namespace Luna::Game {
         CTaskManager() = delete;
         ~CTaskManager() = delete;
 
-        inline void SetTask(CTask *task, int index) {
-            CallMethod<void, CTask *, int, bool>(
-                GameAddress + 0x54390B, this, task, index, false);
+        inline void SetTask(CTask* task, int index, bool unk) {
+            CallMethod<void, CTask*, int, bool>(GameAddress + 0x54397B, this, task, index, unk);
         }
     };
 }

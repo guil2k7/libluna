@@ -10,9 +10,6 @@ using namespace Luna::Core;
 using namespace Luna::Game;
 
 static struct {
-    /// CPlayerPed::SetupPlayerPed(int)
-    CHook<void (LUNA_STDCALL *)(int)> SetupPlayerPed;
-
     /// CPlayerPed::CPlayerPed()
     CHook<CPlayerPed* (LUNA_THISCALL *)(CPlayerPed*, int, bool)> Constructor;
 
@@ -20,65 +17,59 @@ static struct {
     CHook<void (LUNA_THISCALL *)(CPlayerPed*)> ProcessControl;
 
     /// CPlayerPed::GetPadFromPlayer()
-    CHook<CPad* (LUNA_THISCALL *)(CPlayerPed*)> GetPadFromPlayer;
-
-    /// CPlayerPed::GetPadFromPlayer()
     CHook<CPlayerInfo* (LUNA_THISCALL *)(CPlayerPed*)> GetPlayerInfoForThisPlayerPed;
 } hook;
 
-void CPlayerPedMod::Install() {
-    hook.SetupPlayerPed.Hook(
-        GameAddress + 0x4D3935,
-        CPlayerPed::SetupPlayerPed
-    );
-
+void CPlayerPed::InitialiseLuna() {
     hook.Constructor.Hook(
-        GameAddress + 0x4D360D,
-        CPlayerPed::InitialiseInstance
+        GameAddress + 0x4D367D,
+        [](CPlayerPed* self, int id, bool groupCreated) {
+            hook.Constructor.Trampoline()(self, id, groupCreated);
+
+            self->Initialise(id);
+
+            return self;
+        }
     );
 
     hook.ProcessControl.Hook(
-        GameAddress + 0x4D4779,
+        GameAddress + 0x4D47E9,
         [](CPlayerPed* self) { return self->ProcessControl(); }
     );
 
-    hook.GetPadFromPlayer.Hook(
-        GameAddress + 0x4D46D9,
-        [](CPlayerPed* self) { return CPad::GetPad(self->GetID()); }
-    );
-
     hook.GetPlayerInfoForThisPlayerPed.Hook(
-        GameAddress + 0x4D995D,
-        [](CPlayerPed* self) { return &CWorld::Players()[self->GetID()]; }
+        GameAddress + 0x4D99CD,
+        [](CPlayerPed* self) { return &CWorld::Players()[self->m_ID]; }
+    );
+}
+
+CPlayerPed* CPlayerPed::Create(int id, bool groupCreated) {
+    CPlayerPed* instance = reinterpret_cast<CPlayerPed*>(
+        ::operator new(sizeof (CPlayerPed)));
+
+    // Call the contructor.
+    CallMethod<CPlayerPed*, int, bool>(
+        GameAddress + 0x4D367D,
+        instance, id, groupCreated
     );
 
-    hook.SetupPlayerPed.Activate();
-    hook.Constructor.Activate();
-    hook.ProcessControl.Activate();
-    hook.GetPadFromPlayer.Activate();
-    hook.GetPlayerInfoForThisPlayerPed.Activate();
+    return instance;
 }
 
-void CPlayerPed::SetupPlayerPed(int playerID) {
-    hook.SetupPlayerPed.GetTrampoline()(playerID);
+void CPlayerPed::Destroy(CPlayerPed* instance) {
+    CallMethod<void>(GameAddress + 0x4D3901, instance);
 
-    if (playerID != 0) {
-        CWorld::Players()[playerID]
-            .PlayerPed->PedType = PED_TYPE_PLAYER2;
-    }
+    ::operator delete(instance);
 }
 
-CPlayerPed* CPlayerPed::InitialiseInstance(CPlayerPed* self, int id, bool groupCreated) {
-    hook.Constructor.GetTrampoline()(self, id, groupCreated);
+void CPlayerPed::Initialise(int id) {
+    m_ID = id;
 
-    self->id = id;
-
-    return self;
+    if (id == 0)
+        CPad::LocalPad = &m_Pad;
 }
 
 void CPlayerPed::ProcessControl() {
-    if (id != 0)
-        CPad::MapPad1To = id;
-
-    hook.ProcessControl.GetTrampoline()(this);
+    CPad::CurrentPad = &m_Pad;
+    hook.ProcessControl.Trampoline()(this);
 }

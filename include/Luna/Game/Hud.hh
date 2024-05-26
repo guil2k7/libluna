@@ -7,13 +7,11 @@
 namespace Luna::Game {
     class CHud {
     public:
+        static void InitialiseLuna();
+
         CHud() = delete;
+        ~CHud() = delete;
 
         void DrawAfterFade();
-    };
-
-    class CHudMod {
-    public:
-        static void Install();
     };
 }

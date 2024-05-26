@@ -7,6 +7,9 @@ set(CMAKE_ANDROID_STL_TYPE c++_static)
 cmake_minimum_required(VERSION 3.22)
 project(Luna VERSION 0.1.0 LANGUAGES C CXX)
 
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
 add_subdirectory(third-party)
 
 set(CMAKE_CXX_STANDARD 17)

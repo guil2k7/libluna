@@ -9,13 +9,12 @@ namespace Luna::Game {
     class CTaskSimplePlayerOnFoot : public CTask {
     public:
         static inline CTaskSimplePlayerOnFoot* Create() {
-            auto task = CallFunction<CTaskSimplePlayerOnFoot*, unsigned int>(
-                GameAddress + 0x4E6A01, 0x34);
+            auto self = CTask::operator new(sizeof (CTaskSimplePlayerOnFoot));
 
-            CallMethod<CTaskSimplePlayerOnFoot*>(
-                GameAddress + 0x5474E1, task);
+            // Call the constructor.
+            CallMethod<void*>(GameAddress + 0x547551, self);
 
-            return task;
+            return reinterpret_cast<CTaskSimplePlayerOnFoot*>(self);
         }
 
     private:

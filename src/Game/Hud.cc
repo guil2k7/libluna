@@ -11,17 +11,15 @@ using namespace Luna::Game;
 
 static CHook<void (LUNA_THISCALL *)(CHud*)> hook_DrawAfterFade;
 
-void CHudMod::Install() {
+void CHud::InitialiseLuna() {
     hook_DrawAfterFade.Hook(
-        GameAddress + 0x44A659,
+        GameAddress + 0x44A6A9,
         [](CHud* self) { return self->DrawAfterFade(); }
     );
-
-    hook_DrawAfterFade.Activate();
 };
 
 void CHud::DrawAfterFade() {
-    hook_DrawAfterFade.GetTrampoline()(this);
+    hook_DrawAfterFade.Trampoline()(this);
 
-    CGui::GetInstance().Render();
+    CGui::Instance().Render();
 }

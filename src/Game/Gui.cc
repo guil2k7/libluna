@@ -7,13 +7,13 @@
 using namespace Luna;
 using namespace Luna::Game;
 
-CGui* CGui::instance = nullptr;
+CGui* CGui::s_Instance = nullptr;
 
 CGui& CGui::Create() {
-    assert(instance == nullptr);
+    assert(s_Instance == nullptr);
 
-    instance = new CGui;
-    return *instance;
+    s_Instance = new CGui;
+    return *s_Instance;
 }
 
 void CGui::Initialise() {
@@ -39,7 +39,7 @@ void CGui::Render() {
     ImGui_ImplRW_NewFrame();
     ImGui::NewFrame();
 
-    for (auto subscriber : subscribers)
+    for (auto subscriber : m_Subscribers)
         subscriber->Render();
 
     ImGui::EndFrame();

@@ -6,7 +6,7 @@
 
 #include <Luna/Game/Gui.hh>
 #include <Luna/Game/imgui_impl_rw.hh>
-#include <Luna/Game/Mod.hh>
+#include <Luna/Game/Luna.hh>
 #include <Luna/Game/PlayerPed.hh>
 #include <Luna/Game/World.hh>
 #include <Luna/Game/Task/TaskSimplePlayerOnFoot.hh>
@@ -30,12 +30,15 @@ public:
             id += 1;
 
         if (ImGui::Button("Create player")) {
-            CPlayerPed::SetupPlayerPed(id);
+            // CPlayerPed::SetupPlayerPed(id);
 
-            CPlayerPed* player = CWorld::Players()[id].PlayerPed;
+            // CPlayerPed* player = CWorld::Players()[id].PlayerPed;
+            // CPlayerPed* player0 = CWorld::Players()[0].PlayerPed;
 
-            player->GetTaskManager()->SetTask(
-                CTaskSimplePlayerOnFoot::Create(), 4);
+            // player->TaskManager()->SetTask(
+            //     CTaskSimplePlayerOnFoot::Create(), 4, false);
+
+            // player->Matrix() = player0->Matrix();
         }
 
         ImGui::Text("Position:");
@@ -44,7 +47,7 @@ public:
         ImGui::InputFloat("Z", &pos.z);
 
         if (ImGui::Button("Set Position"))
-            CWorld::Players()[0].PlayerPed->GetMatrix().Position = pos;
+            CWorld::Players()[0].PlayerPed->Matrix().Position = pos;
 
         ImGui::End();
     }
@@ -55,9 +58,6 @@ private:
 };
 
 extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    using namespace Luna;
-    using namespace Luna::Game;
-
     auto logger = spdlog::android_logger_mt("luna", "luna");
     logger->set_level(spdlog::level::debug);
 
@@ -67,8 +67,8 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         "Luna, version: {}.{}.{}",
         LUNA_VERSION_MAJOR, LUNA_VERSION_MINOR, LUNA_VERSION_PATCH);
 
-    CMod::Initialise();
-    CGui::GetInstance().Subscribe(new DebugMenu);
+    Game::InitialiseLuna();
+    CGui::Instance().Subscribe(new DebugMenu);
 
     return JNI_VERSION_1_4;
 }

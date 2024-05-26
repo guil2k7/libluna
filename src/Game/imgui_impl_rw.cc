@@ -117,10 +117,10 @@ void ImGui_ImplRW_NewFrame() {
 
     io.DisplaySize = ImVec2(RsGlobal->maximumWidth, RsGlobal->maximumHeight);
 
-    if (io.WantTextInput && !IsKeyboardShown())
-        ShowKeyboard();
-    else if (!io.WantTextInput && IsKeyboardShown())
-        HideKeyboard();
+    // if (io.WantTextInput && !IsKeyboardShown())
+    //     ShowKeyboard();
+    // else if (!io.WantTextInput && IsKeyboardShown())
+    //     HideKeyboard();
 }
 
 void ImGui_ImplRW_RenderDrawData(ImDrawData* drawData) {

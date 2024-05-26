@@ -6,7 +6,7 @@
 using namespace Luna;
 using namespace Luna::Game;
 
-void CWorldMod::Install() {
-    *reinterpret_cast<CPlayerInfo**>(GameAddress + 0x6883C8)
+void CWorld::InitialiseLuna() {
+    *reinterpret_cast<CPlayerInfo**>(GameAddress + 0x6883C0)
         = reinterpret_cast<CPlayerInfo*>(::operator new(sizeof (CPlayerInfo) * 1024));
 }

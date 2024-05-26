@@ -3,19 +3,14 @@
 #include <Luna/Game/Game.hh>
 #include <Luna/Game/Common.hh>
 #include <Luna/Game/Gui.hh>
+#include <Luna/Game/PlayerPed.hh>
+#include <Luna/Game/World.hh>
 #include <Luna/Core/Hook.hh>
 
 using namespace Luna;
 using namespace Luna::Core;
 using namespace Luna::Game;
 
-static CHook<int (LUNA_STDCALL *)(char const*)> hook_Init3;
+void CGame::InitialiseLuna() {
 
-void CGameMod::Install() {
-    hook_Init3.Hook(GameAddress + 0x483139, CGame::Init3);
-    hook_Init3.Activate();
-}
-
-int CGame::Init3(char const* unknown) {
-    return hook_Init3.GetTrampoline()(unknown);
 }

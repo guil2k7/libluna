@@ -11,6 +11,7 @@ namespace Luna::Game {
     enum ePedType {
         PED_TYPE_PLAYER1,
         PED_TYPE_PLAYER2,
+        PED_TYPE_PLAYER_NETWORK,
     };
 
     class CPed {
@@ -19,9 +20,9 @@ namespace Luna::Game {
 
     private:
         PADDING(16); // CSimpleTransform placement
-        CMatrix* matrix; // CMatrixLink
+        CMatrix* m_Matrix; // CMatrixLink
         PADDING(1064);
-        uint8_t* intelligence;
+        uint8_t* m_Intelligence;
         PADDING(344);
 
     public:
@@ -30,11 +31,11 @@ namespace Luna::Game {
 
         ePedType PedType;
 
-        inline CTaskManager* GetTaskManager() {
-            return reinterpret_cast<CTaskManager*>(intelligence + 4);
+        inline CTaskManager* TaskManager() {
+            return reinterpret_cast<CTaskManager*>(m_Intelligence + 4);
         }
 
-        inline CMatrix& GetMatrix() {
+        inline CMatrix& Matrix() {
             return **reinterpret_cast<CMatrix**>(
                 reinterpret_cast<uint8_t*>(this) + 0x14);
         }

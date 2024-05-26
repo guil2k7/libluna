@@ -2,9 +2,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <cstddef>
 
-namespace Luna::Utils {
+namespace Luna::Core {
     inline size_t AlignValue(size_t value, size_t alignment) {
         if (value < alignment)
             return alignment;
@@ -13,11 +14,20 @@ namespace Luna::Utils {
     }
 
     /// Flushes the contents of the instruction cache.
-    static void FlushCache(void* address, size_t size) {
+    inline void FlushCache(void* address, size_t size) {
         __builtin___clear_cache(
             reinterpret_cast<char*>(address),
             &reinterpret_cast<char*>(address)[size]
         );
+    }
+
+    void MakeNop(void* address, size_t size);
+    
+    static inline void MakeAbsJump(void* address, void const* destination, bool thumbMode) {
+        // ldr.w pc, [pc, #0]
+        reinterpret_cast<uint32_t*>(address)[0] = 0xF000F8DF;
+        reinterpret_cast<uint32_t*>(address)[1]
+            = reinterpret_cast<uint32_t>(destination) | (thumbMode ? 1 : 0);
     }
 
     enum eProtection {

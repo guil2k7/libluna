@@ -9,12 +9,12 @@ namespace Luna::Game {
         TOUCH_ACTION_MOVE,
     };
 
-    class OSEventsMod {
+    class OSEvents {
     public:
-        static void Install();
-    };
+        static void InitialiseLuna();
 
-    void ShowKeyboard();
-    void HideKeyboard();
-    bool IsKeyboardShown();
+        static void ShowKeyboard();
+        static void HideKeyboard();
+        static bool IsKeyboardShown();
+    };
 }

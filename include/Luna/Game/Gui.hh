@@ -12,27 +12,27 @@ namespace Luna::Game {
     public:
         virtual void Render() = 0;
     };
-    
+
     class CGui {
     public:
         static CGui& Create();
 
-        static inline CGui& GetInstance() {
-            assert(instance != nullptr);
-            return *instance;
+        static inline CGui& Instance() {
+            assert(s_Instance != nullptr);
+            return *s_Instance;
         }
 
         void Initialise();
         void Render();
-        
+
         inline void Subscribe(IGuiWidget* handler) {
-            subscribers.push_back(handler);
+            m_Subscribers.push_back(handler);
         }
 
     private:
-        static CGui* instance;
+        static CGui* s_Instance;
 
-        std::vector<IGuiWidget* > subscribers;
+        std::vector<IGuiWidget*> m_Subscribers;
     };
 
     /* </NOTSA> */

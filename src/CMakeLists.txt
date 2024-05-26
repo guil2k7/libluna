@@ -2,7 +2,6 @@ set(LUNA_LINK_LIBRARIES spdlog::spdlog imgui)
 set(LUNA_SOURCE_FILES Main.cc)
 
 add_subdirectory(Core)
-add_subdirectory(Utils)
 add_subdirectory(Game)
 
 add_library(luna SHARED ${LUNA_SOURCE_FILES})

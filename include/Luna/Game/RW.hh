@@ -16,9 +16,9 @@
 #include "RW/skeleton.h"
 
 namespace Luna::Game {
-    class CRenderWareMod {
+    class CRenderWare {
     public:
-        static void Install();
+        static void InitialiseLuna();
     };
 }
 
@@ -239,11 +239,11 @@ extern RwImage* (*RwImageRead)(const RwChar* imageName);
 extern const RwChar* (*RwImageSetPath)(const RwChar* path);
 extern RwBool (*RwImageSetGamma)(RwReal gammaValue);
 extern RwImage* (*RwImageGammaCorrect)(RwImage* image);
-extern RwBool (*RwPalQuantInit)(RwPalQuant* pq);
-extern void (*RwPalQuantTerm)(RwPalQuant* pq);
-extern void (*RwPalQuantAddImage)(RwPalQuant* pq, RwImage* img, RwReal weight);
-extern RwInt32 (*RwPalQuantResolvePalette)(RwRGBA* palette, RwInt32 maxcols, RwPalQuant* pq);
-extern void (*RwPalQuantMatchImage)(RwUInt8* dstpixels, RwInt32 dststride, RwInt32 dstdepth, RwBool dstPacked, RwPalQuant* pq, RwImage* img);
+// extern RwBool (*RwPalQuantInit)(RwPalQuant* pq);
+// extern void (*RwPalQuantTerm)(RwPalQuant* pq);
+// extern void (*RwPalQuantAddImage)(RwPalQuant* pq, RwImage* img, RwReal weight);
+// extern RwInt32 (*RwPalQuantResolvePalette)(RwRGBA* palette, RwInt32 maxcols, RwPalQuant* pq);
+// extern void (*RwPalQuantMatchImage)(RwUInt8* dstpixels, RwInt32 dststride, RwInt32 dstdepth, RwBool dstPacked, RwPalQuant* pq, RwImage* img);
 extern RwBool (*RwTextureSetMipmapping)(RwBool enable);
 extern RwBool (*RwTextureGetMipmapping)(void);
 extern RwBool (*RwTextureSetAutoMipmapping)(RwBool enable);
