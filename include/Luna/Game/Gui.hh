@@ -22,7 +22,7 @@ namespace Luna::Game {
             return *s_Instance;
         }
 
-        void Initialise();
+        void Initialize();
         void Render();
 
         inline void Subscribe(IGuiWidget* handler) {

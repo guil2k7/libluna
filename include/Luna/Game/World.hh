@@ -7,7 +7,7 @@
 namespace Luna::Game {
     class CWorld {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
 
         CWorld() = delete;
         ~CWorld() = delete;

@@ -31,7 +31,7 @@ namespace Luna::Game {
         static CPad* LocalPad;
         static CPad* CurrentPad;
 
-        static void InitialiseLuna();
+        static void InitializeLuna();
 
         int16_t UpDown;
         int16_t LeftRight;

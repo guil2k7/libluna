@@ -38,7 +38,7 @@ static void GetGameAddress() {
     GameAddress -= 0x6CCD38;
 }
 
-void Game::InitialiseLuna() {
+void Game::InitializeLuna() {
     GetGameAddress();
 
     // Remove write protection.
@@ -55,13 +55,13 @@ void Game::InitialiseLuna() {
     // .text
     ModifyMemoryProtection(GameAddress + 0x1A1780, 0x5E84E7 - 0x1A1780, PROTECTION_READ | PROTECTION_WRITE | PROTECTION_EXEC);
 
-    CGame::InitialiseLuna();
-    CHud::InitialiseLuna();
-    CPad::InitialiseLuna();
-    CPlayerPed::InitialiseLuna();
-    CRenderWare::InitialiseLuna();
-    OSEvents::InitialiseLuna();
-    CWorld::InitialiseLuna();
+    CGame::InitializeLuna();
+    CHud::InitializeLuna();
+    CPad::InitializeLuna();
+    CPlayerPed::InitializeLuna();
+    CRenderWare::InitializeLuna();
+    OSEvents::InitializeLuna();
+    CWorld::InitializeLuna();
 
-    CGui::Create().Initialise();
+    CGui::Create().Initialize();
 }

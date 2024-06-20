@@ -2420,7 +2420,7 @@ struct rwPipeGlobals
     RxRenderStateVector  defaultRenderState;
     RwLinkList           allPipelines;    /* Unused as of yet, meant to be used to keep track of all
                                            * created pipelines (for CBs and maybe cleanup) */
-    RwUInt32             maxNodesPerPipe; /* Initialised from _rxPipelineMaxNodes at startup. Used to
+    RwUInt32             maxNodesPerPipe; /* Initialized from _rxPipelineMaxNodes at startup. Used to
                                            * allow conservative, single allocations during pipelock */
 
     /* NOTE: Rw and RpWorld PowerPipe globals kept together for simplicity */

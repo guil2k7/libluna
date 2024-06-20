@@ -18,7 +18,7 @@
 namespace Luna::Game {
     class CRenderWare {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
     };
 }
 

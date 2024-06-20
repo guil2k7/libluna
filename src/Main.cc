@@ -30,21 +30,21 @@ public:
             id += 1;
 
         if (ImGui::Button("Create player")) {
-            // CPlayerPed::SetupPlayerPed(id);
+            CPlayerPed::SetupPlayerPed(id + 2);
 
-            // CPlayerPed* player = CWorld::Players()[id].PlayerPed;
-            // CPlayerPed* player0 = CWorld::Players()[0].PlayerPed;
+            CPlayerPed* mainPlayer = CWorld::Players()[0].PlayerPed;
+            CPlayerPed* playerCreated = CWorld::Players()[id + 2].PlayerPed;
 
-            // player->TaskManager()->SetTask(
-            //     CTaskSimplePlayerOnFoot::Create(), 4, false);
+            playerCreated->TaskManager()->SetTask(
+                CTaskSimplePlayerOnFoot::Create(), 4, false);
 
-            // player->Matrix() = player0->Matrix();
+            playerCreated->Matrix() = mainPlayer->Matrix();
         }
 
         ImGui::Text("Position:");
-        ImGui::InputFloat("X", &pos.x);
-        ImGui::InputFloat("Y", &pos.y);
-        ImGui::InputFloat("Z", &pos.z);
+        ImGui::SliderFloat("X", &pos.x, -1000.0, 1000.0);
+        ImGui::SliderFloat("Y", &pos.y, -1000.0, 1000.0);
+        ImGui::SliderFloat("Z", &pos.z, -1000.0, 1000.0);
 
         if (ImGui::Button("Set Position"))
             CWorld::Players()[0].PlayerPed->Matrix().Position = pos;
@@ -67,7 +67,7 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         "Luna, version: {}.{}.{}",
         LUNA_VERSION_MAJOR, LUNA_VERSION_MINOR, LUNA_VERSION_PATCH);
 
-    Game::InitialiseLuna();
+    Game::InitializeLuna();
     CGui::Instance().Subscribe(new DebugMenu);
 
     return JNI_VERSION_1_4;

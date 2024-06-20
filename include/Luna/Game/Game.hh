@@ -5,6 +5,6 @@
 namespace Luna::Game {
     class CGame {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
     };
 }

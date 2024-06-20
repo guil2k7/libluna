@@ -2,12 +2,10 @@
 
 #pragma once
 
-// #include <cstdint>
-
 namespace Luna::Game {
     class CHud {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
 
         CHud() = delete;
         ~CHud() = delete;

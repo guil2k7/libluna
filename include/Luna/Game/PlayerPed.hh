@@ -8,10 +8,11 @@
 namespace Luna::Game {
     class CPlayerPed : public CPed {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
 
         static CPlayerPed* Create(int id, bool groupCreated);
         static void Destroy(CPlayerPed* instance);
+        static void SetupPlayerPed(int id);
 
         void ProcessControl();
 
@@ -23,7 +24,7 @@ namespace Luna::Game {
             return &m_Pad;
         }
 
-        void _Initialise(int id);
+        void _Initialize(int id);
 
     private:
         PADDING(8);

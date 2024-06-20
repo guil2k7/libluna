@@ -16,7 +16,7 @@ CGui& CGui::Create() {
     return *s_Instance;
 }
 
-void CGui::Initialise() {
+void CGui::Initialize() {
     IMGUI_CHECKVERSION();
 
     ImGui::CreateContext();

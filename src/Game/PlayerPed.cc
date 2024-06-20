@@ -3,7 +3,7 @@
 #include <Luna/Game/PlayerPed.hh>
 #include <Luna/Game/Pad.hh>
 #include <Luna/Game/World.hh>
-#include <Luna/Core/MemoryExec.hh>
+#include <Luna/Core/ThumbHook.hh>
 
 using namespace Luna;
 using namespace Luna::Core;
@@ -11,42 +11,57 @@ using namespace Luna::Game;
 
 static struct {
     /// CPlayerPed::CPlayerPed()
-    CFunction<CPlayerPed* (LUNA_THISCALL *)(CPlayerPed*, int, bool)> Constructor;
+    CThumbHook<CPlayerPed* (LUNA_THISCALL *)(CPlayerPed*, int, bool)> Constructor;
+
+    /// CPlayerPed::SetupPlayerPed()
+    CThumbHook<void (LUNA_STDCALL *)(int)> SetupPlayerPed;
 
     /// CPlayerPed::ProcessControl()
-    CFunction<void (LUNA_THISCALL *)(CPlayerPed*)> ProcessControl;
+    CThumbHook<void (LUNA_THISCALL *)(CPlayerPed*)> ProcessControl;
 
     /// CPlayerPed::GetPadFromPlayer()
-    CFunction<CPlayerInfo* (LUNA_THISCALL *)(CPlayerPed*)> GetPlayerInfoForThisPlayerPed;
-} trampoline;
+    CThumbHook<CPlayerInfo* (LUNA_THISCALL *)(CPlayerPed*)> GetPlayerInfoForThisPlayerPed;
+} hook;
 
-static LUNA_THISCALL CPlayerPed* hook_Constructor(CPlayerPed* self, int id, bool groupCreated) {
-    trampoline.Constructor(self, id, groupCreated);
+static LUNA_THISCALL CPlayerPed* HookImpl_Constructor(CPlayerPed* self, int id, bool groupCreated) {
+    hook.Constructor.Trampoline()(self, id, groupCreated);
 
-    self->_Initialise(id);
+    self->_Initialize(id);
 
     return self;
 }
 
-static LUNA_THISCALL void hook_ProcessControl(CPlayerPed* self) {
+static LUNA_THISCALL void HookImpl_ProcessControl(CPlayerPed* self) {
     return self->ProcessControl();
 }
 
-static LUNA_THISCALL CPlayerInfo* hook_GetPlayerInfoForThisPlayerPed(CPlayerPed* self) {
+static LUNA_THISCALL CPlayerInfo* HookImpl_GetPlayerInfoForThisPlayerPed(CPlayerPed* self) {
     return &CWorld::Players()[self->ID()];
 }
 
-void CPlayerPed::InitialiseLuna() {
-    MakeHook(&trampoline.Constructor, GameAddress + 0x4D367D, hook_Constructor);
-    MakeHook(&trampoline.ProcessControl, GameAddress + 0x4D47E9, hook_ProcessControl);
-    MakeHook(&trampoline.GetPlayerInfoForThisPlayerPed, GameAddress + 0x4D99CD, hook_GetPlayerInfoForThisPlayerPed);
+void CPlayerPed::SetupPlayerPed(int id) {
+    hook.SetupPlayerPed.Trampoline()(id);
+
+    if (id > 1)
+        CWorld::Players()[id].PlayerPed->PedType = PED_TYPE_PLAYER_NETWORK;
+}
+
+void CPlayerPed::InitializeLuna() {
+    hook.Constructor.Hook(GameAddress + 0x4D367D, HookImpl_Constructor);
+    hook.ProcessControl.Hook(GameAddress + 0x4D47E9, HookImpl_ProcessControl);
+    hook.GetPlayerInfoForThisPlayerPed.Hook(GameAddress + 0x4D99CD, HookImpl_GetPlayerInfoForThisPlayerPed);
+    hook.SetupPlayerPed.Hook(GameAddress + 0x4D39A5, CPlayerPed::SetupPlayerPed);
+
+    hook.Constructor.Activate();
+    hook.ProcessControl.Activate();
+    hook.GetPlayerInfoForThisPlayerPed.Activate();
+    hook.SetupPlayerPed.Activate();
 }
 
 CPlayerPed* CPlayerPed::Create(int id, bool groupCreated) {
     CPlayerPed* instance = reinterpret_cast<CPlayerPed*>(
         ::operator new(sizeof (CPlayerPed)));
 
-    // Call the contructor.
     CallMethod<CPlayerPed*, int, bool>(
         GameAddress + 0x4D367D,
         instance, id, groupCreated
@@ -61,7 +76,7 @@ void CPlayerPed::Destroy(CPlayerPed* instance) {
     ::operator delete(instance);
 }
 
-void CPlayerPed::_Initialise(int id) {
+void CPlayerPed::_Initialize(int id) {
     m_ID = id;
 
     if (id == 0)
@@ -73,5 +88,6 @@ void CPlayerPed::ProcessControl() {
         m_Pad.Clear();
 
     CPad::CurrentPad = &m_Pad;
-    trampoline.ProcessControl(this);
+    hook.ProcessControl.Trampoline()(this);
+    CPad::CurrentPad = CPad::LocalPad;
 }

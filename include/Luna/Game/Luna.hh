@@ -3,5 +3,5 @@
 #pragma once
 
 namespace Luna::Game {
-    void InitialiseLuna();
+    void InitializeLuna();
 }

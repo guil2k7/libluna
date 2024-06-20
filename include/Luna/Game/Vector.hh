@@ -22,4 +22,10 @@ namespace Luna::Game {
             z = 0.0F;
         }
     };
+
+    class CVector4D : public RwV4d {
+    public:
+        constexpr CVector4D() : RwV4d { 0.0F, 0.0F, 0.0F, 0.0F } {}
+        constexpr CVector4D(float x, float y, float z, float w) : RwV4d { x, y, z, w } {}
+    };
 }

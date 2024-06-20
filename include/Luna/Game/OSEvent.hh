@@ -11,7 +11,7 @@ namespace Luna::Game {
 
     class OSEvents {
     public:
-        static void InitialiseLuna();
+        static void InitializeLuna();
 
         static void ShowKeyboard();
         static void HideKeyboard();

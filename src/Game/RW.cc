@@ -4,7 +4,7 @@
 using namespace Luna;
 using namespace Luna::Game;
 
-void CRenderWare::InitialiseLuna() {
+void CRenderWare::InitializeLuna() {
     *reinterpret_cast<void**>(&RwEngineInstance)                                   = GameAddress + 0x6CCD38;
     *reinterpret_cast<void**>(&RsGlobal)                                           = GameAddress + 0xA0C8FC;
 
