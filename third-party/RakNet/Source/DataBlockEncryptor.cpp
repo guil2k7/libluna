@@ -16,12 +16,10 @@
 
 #include "DataBlockEncryptor.h"
 #include "CheckSum.h"
-#include "GetTime.h"
 #include "Rand.h"
-#include <assert.h>
+#include <RakAssert.h>
 #include <string.h>
 #include "rijndael.h"
-#include "Types.h"
 
 using namespace RakNet;
 
@@ -61,12 +59,8 @@ void DataBlockEncryptor::Encrypt( unsigned char *input, int inputLength, unsigne
 	unsigned char randomChar;
 	CheckSum checkSumCalculator;
 
-#ifdef _DEBUG
-
-	assert( keySet );
-#endif
-
-	assert( input && inputLength );
+	RakAssert( keySet );
+	RakAssert( input && inputLength );
 
 
 	// randomChar will randomize the data so the same data sent twice will not look the same
@@ -143,10 +137,8 @@ bool DataBlockEncryptor::Decrypt( unsigned char *input, int inputLength, unsigne
 	unsigned char encodedPad;
 	unsigned char randomChar;
 	CheckSum checkSumCalculator;
-#ifdef _DEBUG
 
-	assert( keySet );
-#endif
+	RakAssert( keySet );
 
 	if ( input == 0 || inputLength < 16 || ( inputLength % 16 ) != 0 )
 	{

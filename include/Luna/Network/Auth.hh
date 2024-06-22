@@ -5,5 +5,5 @@
 #include <string_view>
 
 namespace Luna::Network {
-    std::string_view GenerateAuthKey(std::string_view recvdKey);
+    std::string GenerateAuthKey(std::string_view recvdKey);
 }

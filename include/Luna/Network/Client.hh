@@ -14,12 +14,19 @@ namespace Luna::Network {
         CLIENT_STATE_CONNECTING,
     };
 
+    struct CConnectData {
+        std::string Host;
+        uint16_t Port;
+        std::string Nickname;
+    };
+
     class CClient {
     public:
         CClient();
         ~CClient();
 
-        void Connect(std::string_view host, int port);
+        bool SetConnectData(CConnectData const& data);
+        void Connect();
         void Process();
 
         inline eClientState State() const {
@@ -27,8 +34,6 @@ namespace Luna::Network {
         }
 
         void SendPacket(IPacketSerializable& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
-
-        std::string Nickname;
 
     private:
         void ProcessPreConnection(RakNet::Packet* packet);
@@ -39,6 +44,7 @@ namespace Luna::Network {
 
         RakNet::RakPeerInterface* m_RakPeer;
         eClientState m_State;
+        CConnectData m_ConnectData;
     };
 
     extern CClient* client;

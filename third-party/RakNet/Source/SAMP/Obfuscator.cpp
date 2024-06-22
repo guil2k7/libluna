@@ -1,4 +1,5 @@
 #include "Obfuscator.h"
+#include <cstring>
 
 void RakNet::SAMP::Obfuscate(uint8_t* dest, const uint8_t* src, size_t len, uint32_t salt)
 {
@@ -22,18 +23,15 @@ void RakNet::SAMP::Obfuscate(uint8_t* dest, const uint8_t* src, size_t len, uint
         0x78, 0xDF, 0xD0, 0x57, 0x5D, 0x84, 0x41, 0x7E, 0xCE, 0xF7, 0x32, 0xC3, 0xD5, 0x20, 0x0B, 0xA7
     };
 
-    uint8_t
-        checksum = 0,
-        curByte = src[0],
-        prevByte;
+    uint8_t checksum = 0;
+    uint8_t byte;
 
     for (size_t i = 0; i < len; ++i)
     {
-        checksum ^= curByte & 0xAA;
-        prevByte = curByte;
-        curByte = src[i + 1];
+        byte = src[i];
+        checksum ^= byte & 0xAA;
 
-        dest[i + 1] = KEYS[prevByte];
+        dest[i + 1] = KEYS[byte];
 
         if (i & 1)
             dest[i + 1] ^= static_cast<uint8_t>(salt ^ 0xCC);

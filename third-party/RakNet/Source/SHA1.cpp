@@ -47,7 +47,7 @@ void CSHA1::Reset()
 	m_count[ 1 ] = 0;
 }
 
-void CSHA1::Transform( unsigned int state[ 5 ], unsigned char buffer[ 64 ] )
+void CSHA1::Transform( unsigned int state[ 5 ], unsigned char const buffer[ 64 ] )
 {
 	unsigned int a = 0, b = 0, c = 0, d = 0, e = 0;
 
@@ -161,7 +161,7 @@ void CSHA1::Transform( unsigned int state[ 5 ], unsigned char buffer[ 64 ] )
 }
 
 // Use this function to hash in binary data and strings
-void CSHA1::Update( unsigned char* data, unsigned int len )
+void CSHA1::Update( unsigned char const* data, unsigned int len )
 {
 	unsigned int i = 0, j = 0;
 

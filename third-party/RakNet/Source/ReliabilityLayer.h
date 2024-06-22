@@ -151,8 +151,6 @@ public:
 	void SetSplitMessageProgressInterval(int interval);
 	void SetUnreliableTimeout(RakNetTime timeoutMS);
 
-	RakPeer* rakPeer;
-
 private:
 
 	/// Generates a datagram (coalesced packets)

@@ -14,17 +14,11 @@
 /// Software Foundation; either version 2 of the License, or (at your
 /// option) any later version.
 
-#if defined(_MSC_VER) && _MSC_VER < 1299 // VC6 doesn't support template specialization
-#include "BitStream_NoTemplate.cpp"
-#else
-
 #include "BitStream.h"
 #include <stdlib.h>
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-#include <float.h>
 #include <arpa/inet.h>
 
 // Was included for memset which now comes from string.h instead
@@ -57,9 +51,9 @@ BitStream::BitStream()
 	//data = ( unsigned char* ) malloc( 32 );
 	data = ( unsigned char* ) stackData;
 	
-#ifndef NDEBUG	
+	
 //	RakAssert( data );
-#endif
+
 	//memset(data, 0, 32);
 	copyData = true;
 }
@@ -78,9 +72,9 @@ BitStream::BitStream( int initialBytesToAllocate )
 		data = ( unsigned char* ) malloc( initialBytesToAllocate );
 		numberOfBitsAllocated = initialBytesToAllocate << 3;
 	}
-#ifndef NDEBUG
+
 	RakAssert( data );
-#endif
+
 	// memset(data, 0, initialBytesToAllocate);
 	copyData = true;
 }
@@ -105,9 +99,9 @@ BitStream::BitStream( unsigned char* _data, unsigned int lengthInBytes, bool _co
 			{
 				data = ( unsigned char* ) malloc( lengthInBytes );
 			}
-#ifndef NDEBUG
+
 			RakAssert( data );
-#endif
+
 			memcpy( data, _data, lengthInBytes );
 		}
 		else
@@ -120,9 +114,9 @@ BitStream::BitStream( unsigned char* _data, unsigned int lengthInBytes, bool _co
 // Use this if you pass a pointer copy to the constructor (_copyData==false) and want to overallocate to prevent reallocation
 void BitStream::SetNumberOfBitsAllocated( const unsigned int lengthInBits )
 {
-#ifndef NDEBUG
+
 	RakAssert( lengthInBits >= ( unsigned int ) numberOfBitsAllocated );
-#endif	
+	
 	numberOfBitsAllocated = lengthInBits;
 }
 
@@ -180,16 +174,19 @@ void BitStream::Write( BitStream *bitStream)
 }
 void BitStream::Write( BitStream *bitStream, int numberOfBits )
 {
+	if (numberOfBits > bitStream->GetNumberOfUnreadBits())
+		return;
+
 	AddBitsAndReallocate( numberOfBits );
 	int numberOfBitsMod8;
 
-	while (numberOfBits-->0 && bitStream->readOffset + 1 <= bitStream->numberOfBitsUsed)
+	while (numberOfBits-->0)
 	{
 		numberOfBitsMod8 = numberOfBitsUsed & 7;
 		if ( numberOfBitsMod8 == 0 )
 		{
 			// New byte
-			if (bitStream->data[ bitStream->readOffset >> 3 ] & ( 0x80 >> ( bitStream->readOffset++ % 8 ) ) )
+			if (bitStream->data[ bitStream->readOffset >> 3 ] & ( 0x80 >> ( bitStream->readOffset % 8 ) ) )
 			{
 				// Write 1
 				data[ numberOfBitsUsed >> 3 ] = 0x80;
@@ -199,13 +196,15 @@ void BitStream::Write( BitStream *bitStream, int numberOfBits )
 				// Write 0
 				data[ numberOfBitsUsed >> 3 ] = 0;
 			}
+			++bitStream->readOffset;
 		}
 		else
 		{
 			// Existing byte
-			if (bitStream->data[ bitStream->readOffset >> 3 ] & ( 0x80 >> ( bitStream->readOffset++ % 8 ) ) )
+			if (bitStream->data[ bitStream->readOffset >> 3 ] & ( 0x80 >> ( bitStream->readOffset % 8 ) ) )
 				data[ numberOfBitsUsed >> 3 ] |= 0x80 >> ( numberOfBitsMod8 ); // Set the bit to 1
 			// else 0, do nothing
+			++bitStream->readOffset;
 		}
 
 		numberOfBitsUsed++;
@@ -218,7 +217,7 @@ bool BitStream::Read( char* output, const int numberOfBytes )
 	// Optimization:
 	if ((readOffset & 7) == 0)
 	{
-		if ( readOffset + ( numberOfBytes << 3 ) > numberOfBitsUsed )
+		if (GetNumberOfUnreadBits() < (numberOfBytes << 3))
 			return false;
 
 		// Write the data
@@ -278,34 +277,37 @@ void BitStream::Write1( void )
 // Returns true if the next data read is a 1, false if it is a 0
 bool BitStream::ReadBit( void )
 {
-	bool bit = ( bool ) ( data[ readOffset >> 3 ] & ( 0x80 >> ( readOffset & 7 ) ) );
-	++readOffset;
+	if (GetNumberOfUnreadBits() == 0) {
+		return false;
+	}
 
-	return bit;
+	bool res = ( bool ) ( data[ readOffset >> 3 ] & ( 0x80 >> ( readOffset & 7 ) ) );
+	++readOffset;
+	return res;
 }
 
 // Align the bitstream to the byte boundary and then write the specified number of bits.
-// This is faster than WriteBits but wastes the bits to do the alignment and requires you to call
+// This is faster than DoWriteBits but wastes the bits to do the alignment and requires you to call
 // SetReadToByteAlignment at the corresponding read position
 void BitStream::WriteAlignedBytes( const unsigned char* input,
 	const int numberOfBytesToWrite )
 {
-#ifndef NDEBUG
+
 	RakAssert( numberOfBytesToWrite > 0 );
-#endif
+
 	
 	AlignWriteToByteBoundary();
 	Write((const char*) input, numberOfBytesToWrite);
 }
 
 // Read bits, starting at the next aligned bits. Note that the modulus 8 starting offset of the
-// sequence must be the same as was used with WriteBits. This will be a problem with packet coalescence
+// sequence must be the same as was used with DoWriteBits. This will be a problem with packet coalescence
 // unless you byte align the coalesced packets.
 bool BitStream::ReadAlignedBytes( unsigned char* output, const int numberOfBytesToRead )
 {
-#ifndef NDEBUG
+
 	RakAssert( numberOfBytesToRead > 0 );
-#endif
+
 	
 	if ( numberOfBytesToRead <= 0 )
 		return false;
@@ -313,7 +315,7 @@ bool BitStream::ReadAlignedBytes( unsigned char* output, const int numberOfBytes
 	// Byte align
 	AlignReadToByteBoundary();
 
-	if ( readOffset + ( numberOfBytesToRead << 3 ) > numberOfBitsUsed )
+	if (GetNumberOfUnreadBits() < (numberOfBytesToRead << 3))
 		return false;
 
 	// Write the data
@@ -455,16 +457,16 @@ void BitStream::WriteCompressed( const unsigned char* input,
 
 // Read numberOfBitsToRead bits to the output source
 // alignBitsToRight should be set to true to convert internal bitstream data to userdata
-// It should be false if you used WriteBits with rightAlignedBits false
+// It should be false if you used DoWriteBits with rightAlignedBits false
 bool BitStream::ReadBits( unsigned char* output, int numberOfBitsToRead, const bool alignBitsToRight )
 {
-#ifndef NDEBUG
+
 	RakAssert( numberOfBitsToRead > 0 );
-#endif
+
 	if (numberOfBitsToRead<=0)
 	  return false;
 	
-	if ( readOffset + numberOfBitsToRead > numberOfBitsUsed )
+	if (GetNumberOfUnreadBits() < numberOfBitsToRead)
 		return false;
 		
 	int readOffsetMod8;
@@ -592,11 +594,11 @@ void BitStream::AddBitsAndReallocate( const int numberOfBitsToWrite )
 	
 	if ( numberOfBitsToWrite + numberOfBitsUsed > 0 && ( ( numberOfBitsAllocated - 1 ) >> 3 ) < ( ( newNumberOfBitsAllocated - 1 ) >> 3 ) )   // If we need to allocate 1 or more new bytes
 	{
-#ifndef NDEBUG
+
 		// If this assert hits then we need to specify true for the third parameter in the constructor
 		// It needs to reallocate to hold all the data and can't do it unless we allocated to begin with
 		RakAssert( copyData == true );
-#endif
+
 
 		// Less memory efficient but saves on news and deletes
 		newNumberOfBitsAllocated = ( numberOfBitsToWrite + numberOfBitsUsed ) * 2;
@@ -618,9 +620,9 @@ void BitStream::AddBitsAndReallocate( const int numberOfBitsToWrite )
 			data = ( unsigned char* ) realloc( data, amountToAllocate );
 		}
 
-#ifndef NDEBUG
+
 		RakAssert( data ); // Make sure realloc succeeded
-#endif
+
 		//  memset(data+newByteOffset, 0,  ((newNumberOfBitsAllocated-1)>>3) - ((numberOfBitsAllocated-1)>>3)); // Set the new data block to 0
 	}
 	
@@ -670,9 +672,9 @@ void BitStream::PrintBits( void ) const
 // Data will point to the stream.  Returns the length in bits of the stream.
 int BitStream::CopyData( unsigned char** _data ) const
 {
-#ifndef NDEBUG
+
 	RakAssert( numberOfBitsUsed > 0 );
-#endif
+
 	
 	*_data = new unsigned char [ BITS_TO_BYTES( numberOfBitsUsed ) ];
 	memcpy( *_data, data, sizeof(unsigned char) * ( BITS_TO_BYTES( numberOfBitsUsed ) ) );
@@ -744,10 +746,10 @@ void BitStream::AssertCopyData( void )
 		if ( numberOfBitsAllocated > 0 )
 		{
 			unsigned char * newdata = ( unsigned char* ) malloc( BITS_TO_BYTES( numberOfBitsAllocated ) );
-#ifndef NDEBUG
+
 			
 			RakAssert( data );
-#endif
+
 			
 			memcpy( newdata, data, BITS_TO_BYTES( numberOfBitsAllocated ) );
 			data = newdata;
@@ -775,5 +777,3 @@ bool BitStream::DoEndianSwap(void) const
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
-
-#endif // #if _MSC_VER < 1299 

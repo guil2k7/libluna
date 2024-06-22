@@ -17,20 +17,32 @@ CClient* Network::client = nullptr;
 
 CClient::CClient() {
     m_RakPeer = RakNet::RakNetworkFactory::GetRakPeerInterface();
-    m_State = CLIENT_STATE_UNDEFINED;
+    m_State = CLIENT_STATE_DISCONNECTED;
 }
 
 CClient::~CClient() {
     RakNet::RakNetworkFactory::DestroyRakPeerInterface(m_RakPeer);
 }
 
-void CClient::Connect(std::string_view host, int port) {
-    m_RakPeer->Connect(host.data(), port, nullptr, 0);
+bool CClient::SetConnectData(CConnectData const& data) {
+    if (m_State != CLIENT_STATE_DISCONNECTED)
+        return false;
+
+    m_ConnectData = data;
+
+    return true;
+}
+
+void CClient::Connect() {
+    m_RakPeer->Disconnect(100);
+    m_RakPeer->Initialize(1, 0, 30);
+
+    m_RakPeer->Connect(m_ConnectData.Host.data(), m_ConnectData.Port, nullptr, 0);
     m_State = CLIENT_STATE_CONNECTING;
 }
 
 void CClient::Process() {
-    if (m_State == CLIENT_STATE_UNDEFINED)
+    if (m_State == CLIENT_STATE_DISCONNECTED)
         return;
 
     RakNet::Packet* packet = m_RakPeer->Receive();
@@ -85,6 +97,11 @@ void CClient::ProcessPreConnection(RakNet::Packet* packet) {
         spdlog::info("ID_CONNECTION_REQUEST_ACCEPTED");
         ProcessConnectionRequestAccepted(packet);
         break;
+
+    case RakNet::ID_CONNECTION_ATTEMPT_FAILED:
+        spdlog::info("Connection attempt failed. Retrying...");
+        Connect();
+        break;
     }
 }
 
@@ -124,7 +141,7 @@ void CClient::ProcessConnectionRequestAccepted(RakNet::Packet* packet) {
     Code::CClientJoin response;
     response.Version = 4057;
     response.Mod = 1;
-    response.Nickname = Nickname;
+    response.Nickname = m_ConnectData.Nickname;
     response.ClientChallengeResponse = data.SampToken ^ 4057;
     response.Auth = "15121F6F18550C00AC4B4F8A167D0379BB0ACA99043";
     response.ClientVersion = "0.3.7";

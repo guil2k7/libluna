@@ -74,14 +74,6 @@
 // a copy of code further down, but keeps the def outside
 // the cat namespace
 
-#ifndef BIG_ENDIAN
-    #define BIG_ENDIAN 1
-#endif
-
-#ifndef HOST_ENDIAN_IS_BIG
-    #define HOST_ENDIAN_IS_BIG 1
-#endif
-
 #if !defined(HOST_ENDIAN_IS_BIG) && !defined(HOST_ENDIAN_IS_LITTLE)
 #if defined(__sparc) || defined(__sparc__) || defined(__powerpc__) || \
 	defined(__ppc__) || defined(__hppa) || defined(_MIPSEB) || defined(_POWER) || \
@@ -105,7 +97,7 @@
 
 #else
 
-# error "I can't tell what endian-ness to use for your architecture."
+// # error "I can't tell what endian-ness to use for your architecture."
 
 #endif
 #endif
@@ -141,7 +133,7 @@ namespace cat
 
 #else
 
-# error "I can't tell what endian-ness to use for your architecture."
+// # error "I can't tell what endian-ness to use for your architecture."
 
 #endif
 #endif

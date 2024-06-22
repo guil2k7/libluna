@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PacketPriority.h"
+#include "NetworkTypes.h"
 #include "Export.h"
 
 namespace RakNet

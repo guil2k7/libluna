@@ -12,14 +12,11 @@ namespace Luna::Network::Code {
         LUNA_DEFINE_PACKET(12, false)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
-            uint8_t length = deserializer.DeserializeU8();
+            uint8_t length = deserializer.DeserializeU8() - 1;
 
             auth.resize(length);
-
             deserializer.DeserializeBytes(
                 reinterpret_cast<uint8_t*>(auth.data()), length);
-
-            auth[length] = '\0';
         }
 
         std::string auth;
@@ -34,7 +31,7 @@ namespace Luna::Network::Code {
                 reinterpret_cast<uint8_t const*>(auth.data()), auth.length());
         }
 
-        std::string_view auth;
+        std::string auth;
     };
 
     struct CConnectionRequestAccepted final : public IPacketDeserializable {

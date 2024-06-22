@@ -10,12 +10,18 @@
 #include <Luna/Game/PlayerPed.hh>
 #include <Luna/Game/World.hh>
 #include <Luna/Game/Task/TaskSimplePlayerOnFoot.hh>
+#include <Luna/Network/Client.hh>
 
 using namespace Luna;
 using namespace Luna::Game;
+using namespace Luna::Network;
 
 class DebugMenu final : public IGuiWidget {
 public:
+    DebugMenu() {
+        strcpy(host, "192.168.1.14");
+    }
+
     void Render() {
         ImGui::Begin("Debug Menu");
 
@@ -41,13 +47,18 @@ public:
             playerCreated->Matrix() = mainPlayer->Matrix();
         }
 
-        ImGui::Text("Position:");
-        ImGui::SliderFloat("X", &pos.x, -1000.0, 1000.0);
-        ImGui::SliderFloat("Y", &pos.y, -1000.0, 1000.0);
-        ImGui::SliderFloat("Z", &pos.z, -1000.0, 1000.0);
+        ImGui::InputText("IP or Host", host, sizeof host);
 
-        if (ImGui::Button("Set Position"))
-            CWorld::Players()[0].PlayerPed->Matrix().Position = pos;
+        if (ImGui::Button("Connect")) {
+            CConnectData connectData;
+
+            connectData.Host = std::string_view(host);
+            connectData.Port = 7777;
+            connectData.Nickname = "guil2k7_luna";
+
+            client->SetConnectData(connectData);
+            client->Connect();
+        }
 
         ImGui::End();
     }
@@ -55,6 +66,7 @@ public:
 private:
     int id = 0;
     CVector pos;
+    char host[128];
 };
 
 extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {

@@ -934,9 +934,9 @@ namespace RakNet
 			var=-1.0f;
 		if (var > 1.0f)
 			var=1.0f;
-#ifndef NDEBUG
+
 		RakAssert(sizeof(unsigned long)==4);
-#endif
+
 		Write((unsigned long)((var+1.0)*2147483648.0));
 	}
 
@@ -1047,7 +1047,7 @@ namespace RakNet
 	template <>
 		inline bool BitStream::Read(bool &var)
 	{
-		if ( readOffset + 1 > numberOfBitsUsed )
+		if (GetNumberOfUnreadBits() == 0)
 			return false;
 
 		if ( data[ readOffset >> 3 ] & ( 0x80 >> ( readOffset % 8 ) ) )   // Is it faster to just write it out here?
@@ -1210,9 +1210,8 @@ namespace RakNet
 	template <class templateType> // templateType for this function must be a float or double
 		void BitStream::WriteNormVector( templateType x, templateType y, templateType z )
 	{
-#ifndef NDEBUG
 		RakAssert(x <= 1.01 && y <= 1.01 && z <= 1.01 && x >= -1.01 && y >= -1.01 && z >= -1.01);
-#endif
+
 		if (x>1.0)
 			x=1.0;
 		if (y>1.0)
@@ -1416,7 +1415,7 @@ namespace RakNet
 		if (cxNeg) x=-x;
 		if (cyNeg) y=-y;
 		if (czNeg) z=-z;
-		float difference = 1.0 - x*x - y*y - z*z;
+		float difference = 1.0f - x*x - y*y - z*z;
 		if (difference < 0.0f)
 			difference=0.0f;
 		w = (templateType)(sqrt(difference));

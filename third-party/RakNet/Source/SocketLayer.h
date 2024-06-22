@@ -99,7 +99,7 @@ public:
 	/// \param[in] ip The address of the remote host in dotted notation.
 	/// \param[in] port The port number to send to.
 	/// \return 0 on success, nonzero on failure.
-	int SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int length, char ip[ 16 ], unsigned short port );
+	int SendTo( SOCKET s, const char *data, int length, char ip[ 16 ], unsigned short port );
 	
 	/// Call sendto (UDP obviously)
 	/// \param[in] rakPeer The instance of rakPeer that will send data.
@@ -109,7 +109,7 @@ public:
 	/// \param[in] binaryAddress The address of the remote host in binary format.
 	/// \param[in] port The port number to send to.
 	/// \return 0 on success, nonzero on failure.
-	int SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int length, unsigned int binaryAddress, unsigned short port );
+	int SendTo( SOCKET s, const char *data, int length, unsigned int binaryAddress, unsigned short port );
 		
 	/// Returns the local port, useful when passing 0 as the startup port.
 	/// \param[in] s The socket whose port we are referring to

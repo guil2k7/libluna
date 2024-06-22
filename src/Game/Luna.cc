@@ -11,6 +11,7 @@
 #include <Luna/Game/OSEvent.hh>
 #include <Luna/Game/World.hh>
 #include <Luna/Core/Memory.hh>
+#include <Luna/Network/Client.hh>
 
 #include <spdlog/spdlog.h>
 #include <dlfcn.h>
@@ -18,6 +19,7 @@
 using namespace Luna;
 using namespace Luna::Core;
 using namespace Luna::Game;
+using namespace Luna::Network;
 
 uint8_t* Game::GameAddress = nullptr;
 
@@ -64,4 +66,6 @@ void Game::InitializeLuna() {
     CWorld::InitializeLuna();
 
     CGui::Create().Initialize();
+
+    client = new CClient();
 }

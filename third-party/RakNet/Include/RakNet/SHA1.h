@@ -17,9 +17,7 @@
 
 #pragma once
 
-#include <stdio.h> // Needed for file access
 #include <memory.h> // Needed for memset and memcpy
-#include <string.h> // Needed for strcat and strcpy
 #include "Types.h" 
 #include "Export.h"
 
@@ -70,7 +68,7 @@ public:
 	unsigned char m_buffer[ 64 ];
 	unsigned char m_digest[ 20 ];
 	void Reset();
-	void Update( unsigned char* data, unsigned int len );
+	void Update( unsigned char const* data, unsigned int len );
 	bool HashFile( char *szFileName );
 	void Final();
 	void ReportHash( char *szReport, unsigned char uReportType = REPORT_HEX );
@@ -78,7 +76,7 @@ public:
 	unsigned char * GetHash( void ) const;
 
 private:
-	void Transform( unsigned int state[ 5 ], unsigned char buffer[ 64 ] );
+	void Transform( unsigned int state[ 5 ], unsigned char const buffer[ 64 ] );
 	unsigned char workspace[ 64 ];
 };
 

@@ -14,4 +14,4 @@
 #define _RAK_BITSTREAM_NATIVE_END
 
 /// Maximum (stack) size to use before using new and delete instead.
-#define _RAK_MAX_STACK_ALLOCATION (256*1024)
+#define _RAK_MAX_STACK_ALLOCATION (512*1024)

@@ -142,7 +142,7 @@ void ReliabilityLayer::InitializeVariables( void )
 	splitPacketId = 0;
 	messageNumber = 0;
 	availableBandwidth=0;
-	lastUpdateTime= RakNet::GetTimeNS();
+	lastUpdateTime= GetTimeNS();
 	currentBandwidth=STARTING_SEND_BPS;
 	// lastPacketSendTime=retransmittedFrames=sentPackets=sentFrames=receivedPacketsCount=bytesSent=bytesReceived=0;
 
@@ -208,7 +208,8 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 	while ( outputQueue.Size() > 0 )
 	{
 		internalPacket = outputQueue.Pop();
-		delete [] internalPacket->data;
+		if (internalPacket->data)
+			delete [] internalPacket->data;
 		internalPacketPool.ReleasePointer( internalPacket );
 	}
 
@@ -225,7 +226,9 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 				while ( theList->Size() )
 				{
 					internalPacket = orderingList[ i ]->Pop();
-					delete [] internalPacket->data;
+
+					if (internalPacket->data)
+						delete [] internalPacket->data;
 					internalPacketPool.ReleasePointer( internalPacket );
 				}
 
@@ -245,7 +248,8 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 
 		if ( internalPacket )
 		{
-			delete [] internalPacket->data;
+			if (internalPacket->data)
+				delete [] internalPacket->data;
 			internalPacketPool.ReleasePointer( internalPacket );
 		}
 	}
@@ -264,11 +268,11 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 		sendPacketSet[ i ].ClearAndForceAllocation( 32 ); // Preallocate the send lists so we don't do a bunch of reallocations unnecessarily
 	}
 
-#ifndef NDEBUG
-	for (unsigned i = 0; i < delayList.Size(); i++ )
-		delete delayList[ i ];
-	delayList.Clear();
-#endif
+// #ifndef NDEBUG
+// 	for (unsigned i = 0; i < delayList.Size(); i++ )
+// 		delete delayList[ i ];
+// 	delayList.Clear();
+// #endif
 
 	internalPacketPool.ClearPool();
 
@@ -287,9 +291,7 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 //-------------------------------------------------------------------------------------------------------
 bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffer, int length, PlayerID playerId, DataStructures::List<PluginInterface*> &messageHandlerList, int MTUSize )
 {
-#ifndef NDEBUG
 	RakAssert( !( length <= 0 || buffer == 0 ) );
-#endif
 
 	if ( length <= 1 || buffer == 0 )   // Length of 1 is a connection request resend that we just ignore
 		return true;
@@ -324,7 +326,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 	statistics.packetsReceived++;
 
 	BitStream socketData( (unsigned char*) buffer, length, false ); // Convert the incoming data to a bitstream for easy parsing
-	time = RakNet::GetTimeNS();
+	time = GetTimeNS();
 
 	DataStructures::RangeList<MessageNumberType> incomingAcks;
 	socketData.Read(hasAcks);
@@ -430,7 +432,8 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 				statistics.duplicateMessagesReceived++;
 
 				// Duplicate packet
-				delete [] internalPacket->data;
+				if (internalPacket->data)
+					delete [] internalPacket->data;
 				internalPacketPool.ReleasePointer( internalPacket );
 				goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 			}
@@ -448,7 +451,8 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					statistics.duplicateMessagesReceived++;
 
 					// Duplicate packet
-					delete [] internalPacket->data;
+					if (internalPacket->data)
+						delete [] internalPacket->data;
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -461,10 +465,9 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 				while ((MessageNumberType)(holeCount) > hasReceivedPacketQueue.Size())
 					hasReceivedPacketQueue.Push(time+(RakNetTimeNS)timeoutTime*1000); // Didn't get this packet - set the time to give up waiting
 				hasReceivedPacketQueue.Push(0); // Got the packet
-#ifndef NDEBUG
+
 				// If this assert hits then MessageNumberType has overflowed
 				RakAssert(hasReceivedPacketQueue.Size() < (unsigned int)((MessageNumberType)(-1)));
-#endif
 			}
 
 			// Pop all expired times.  0 means we got the packet, in which case we don't track this index either.
@@ -486,9 +489,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 
 			if ( internalPacket->reliability == RELIABLE_SEQUENCED || internalPacket->reliability == UNRELIABLE_SEQUENCED )
 			{
-#ifndef NDEBUG
 				RakAssert( internalPacket->orderingChannel < NUMBER_OF_ORDERED_STREAMS );
-#endif
 
 				if ( internalPacket->orderingChannel >= NUMBER_OF_ORDERED_STREAMS )
 				{
@@ -497,7 +498,9 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					printf( "Got invalid packet\n" );
 #endif
 
-					delete [] internalPacket->data;
+					if (internalPacket->data)
+						delete [] internalPacket->data;
+					
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -548,7 +551,9 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					statistics.sequencedMessagesOutOfOrder++;
 
 					// Older sequenced packet. Discard it
-					delete [] internalPacket->data;
+					if (internalPacket->data)
+						delete [] internalPacket->data;
+
 					internalPacketPool.ReleasePointer( internalPacket );
 				}
 
@@ -580,9 +585,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 
 			if ( internalPacket->reliability == RELIABLE_ORDERED )
 			{
-#ifndef NDEBUG
 				RakAssert( internalPacket->orderingChannel < NUMBER_OF_ORDERED_STREAMS );
-#endif
 
 				if ( internalPacket->orderingChannel >= NUMBER_OF_ORDERED_STREAMS )
 				{
@@ -590,7 +593,9 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					printf("Got invalid ordering channel %i from packet %i\n", internalPacket->orderingChannel, internalPacket->messageNumber);
 #endif
 					// Invalid packet
-					delete [] internalPacket->data;
+					if (internalPacket->data)
+						delete [] internalPacket->data;
+					
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -1147,7 +1152,7 @@ void ReliabilityLayer::SendBitStream( SOCKET s, PlayerID playerId, BitStream *bi
 	statistics.totalBitsSent += length * 8;
 	//printf("total bits=%i length=%i\n", BITS_TO_BYTES(statistics.totalBitsSent), length);
 
-	SocketLayer::Instance()->SendTo( rakPeer, s, ( char* ) bitStream->GetData(), length, playerId.binaryAddress, playerId.port );
+	SocketLayer::Instance()->SendTo( s, ( char* ) bitStream->GetData(), length, playerId.binaryAddress, playerId.port );
 
 	// lastPacketSendTime=time;
 }
@@ -1208,7 +1213,10 @@ unsigned ReliabilityLayer::GenerateDatagram( BitStream *output, int MTUSize, boo
 		if ( internalPacket->nextActionTime == 0 )
 		{
 			resendQueue.Pop();
-			delete [] internalPacket->data;
+			
+			if (internalPacket->data)
+				delete [] internalPacket->data;
+			
 			internalPacketPool.ReleasePointer( internalPacket );
 			continue; // This was a hole
 		}
@@ -1293,7 +1301,9 @@ unsigned ReliabilityLayer::GenerateDatagram( BitStream *output, int MTUSize, boo
 				time > internalPacket->creationTime+(RakNetTimeNS)unreliableTimeout)
 			{
 				// Unreliable packets are deleted
-				delete [] internalPacket->data;
+				if (internalPacket->data)
+					delete [] internalPacket->data;
+				
 				internalPacketPool.ReleasePointer( internalPacket );
 				continue;
 			}
@@ -1350,7 +1360,9 @@ unsigned ReliabilityLayer::GenerateDatagram( BitStream *output, int MTUSize, boo
 			else
 			{
 				// Unreliable packets are deleted
-				delete [] internalPacket->data;
+				if (internalPacket->data)
+					delete [] internalPacket->data;
+
 				internalPacketPool.ReleasePointer( internalPacket );
 			}
 		}
@@ -1526,9 +1538,7 @@ void ReliabilityLayer::SendAcknowledgementPacket( const MessageNumberType messag
 //-------------------------------------------------------------------------------------------------------
 int ReliabilityLayer::GetBitStreamHeaderLength( const InternalPacket *const internalPacket )
 {
-#ifndef NDEBUG
 	RakAssert( internalPacket );
-#endif
 
 	int bitLength;
 
@@ -1536,7 +1546,7 @@ int ReliabilityLayer::GetBitStreamHeaderLength( const InternalPacket *const inte
 
 	// Write the PacketReliability.  This is encoded in 3 bits
 	//bitStream->WriteBits((unsigned char*)&(internalPacket->reliability), 3, true);
-	bitLength += 3;
+	bitLength += 4;
 
 	// If the reliability requires an ordering channel and ordering index, we Write those.
 	if ( internalPacket->reliability == UNRELIABLE_SEQUENCED || internalPacket->reliability == RELIABLE_SEQUENCED || internalPacket->reliability == RELIABLE_ORDERED )
@@ -1584,9 +1594,7 @@ int ReliabilityLayer::GetBitStreamHeaderLength( const InternalPacket *const inte
 //-------------------------------------------------------------------------------------------------------
 int ReliabilityLayer::WriteToBitStreamFromInternalPacket( BitStream *bitStream, const InternalPacket *const internalPacket )
 {
-#ifndef NDEBUG
 	RakAssert( bitStream && internalPacket );
-#endif
 
 	int start = bitStream->GetNumberOfBitsUsed();
 	const unsigned char c = (unsigned char) internalPacket->reliability;
@@ -1605,12 +1613,10 @@ int ReliabilityLayer::WriteToBitStreamFromInternalPacket( BitStream *bitStream, 
 	// Acknowledgment packets have no more data than the messageNumber and whether it is anacknowledgment
 
 
-#ifndef NDEBUG
 	RakAssert( internalPacket->dataBitLength > 0 );
-#endif
 
-	// Write the PacketReliability.  This is encoded in 3 bits
-	bitStream->WriteBits( (const unsigned char *)&c, 3, true );
+	// Write the PacketReliability.  This is encoded in 4 bits
+	bitStream->WriteBits( (const unsigned char *)&c, 4, true );
 
 	// If the reliability requires an ordering channel and ordering index, we Write those.
 	if ( internalPacket->reliability == UNRELIABLE_SEQUENCED || internalPacket->reliability == RELIABLE_SEQUENCED || internalPacket->reliability == RELIABLE_ORDERED )
@@ -1635,10 +1641,7 @@ int ReliabilityLayer::WriteToBitStreamFromInternalPacket( BitStream *bitStream, 
 	}
 
 	// Write how many bits the packet data is. Stored in 13 bits
-#ifndef NDEBUG
 	RakAssert( BITS_TO_BYTES( internalPacket->dataBitLength ) < MAXIMUM_MTU_SIZE ); // I never send more than MTU_SIZE bytes
-
-#endif
 
 	unsigned short length = ( unsigned short ) internalPacket->dataBitLength; // Ignore the 2 high bytes for WriteBits
 
@@ -1702,7 +1705,7 @@ InternalPacket* ReliabilityLayer::CreateInternalPacketFromBitStream( BitStream *
 	// Read the PacketReliability. This is encoded in 3 bits
 	unsigned char reliability;
 
-	bitStreamSucceeded = bitStream->ReadBits( ( unsigned char* ) ( &( reliability ) ), 3 );
+	bitStreamSucceeded = bitStream->ReadBits( ( unsigned char* ) ( &( reliability ) ), 4 );
 
 	internalPacket->reliability = ( const PacketReliability ) reliability;
 
@@ -1859,7 +1862,9 @@ InternalPacket* ReliabilityLayer::CreateInternalPacketFromBitStream( BitStream *
 
 	if ( bitStreamSucceeded == false )
 	{
-		delete [] internalPacket->data;
+		if (internalPacket->data)
+			delete [] internalPacket->data;
+		
 		internalPacketPool.ReleasePointer( internalPacket );
 		return 0;
 	}
@@ -1916,7 +1921,10 @@ void ReliabilityLayer::DeleteSequencedPacketsInList( unsigned char orderingChann
 		{
 			InternalPacket * internalPacket = theList[ i ];
 			theList.RemoveAtIndex( i );
-			delete [] internalPacket->data;
+			
+			if (internalPacket->data)
+				delete [] internalPacket->data;
+			
 			internalPacketPool.ReleasePointer( internalPacket );
 		}
 
@@ -1941,7 +1949,10 @@ void ReliabilityLayer::DeleteSequencedPacketsInList( unsigned char orderingChann
 		{
 			internalPacket = theList[ i ];
 			theList.Del( i );
-			delete [] internalPacket->data;
+			
+			if (internalPacket->data)
+				delete [] internalPacket->data;
+
 			internalPacketPool.ReleasePointer( internalPacket );
 			listSize--;
 		}
@@ -1999,10 +2010,8 @@ void ReliabilityLayer::SplitPacket( InternalPacket *internalPacket, int MTUSize 
 	if ( encryptor.IsKeySet() )
 		maxDataSize -= 16; // Extra data for the encryptor
 
-#ifndef NDEBUG
 	// Make sure we need to split the packet to begin with
 	RakAssert( dataByteLength > maxDataSize - headerLength );
-#endif
 
 	// How much to send in the largest block
 	maximumSendBlock = maxDataSize - headerLength;
@@ -2093,7 +2102,9 @@ void ReliabilityLayer::SplitPacket( InternalPacket *internalPacket, int MTUSize 
 	}
 
 	// Delete the original
-	delete [] internalPacket->data;
+	if (internalPacket->data)
+		delete [] internalPacket->data;
+
 	internalPacketPool.ReleasePointer( internalPacket );
 
 	if (usedAlloca==false)
@@ -2136,7 +2147,7 @@ void ReliabilityLayer::InsertIntoSplitPacketList( InternalPacket * internalPacke
 		unsigned int length = sizeof(MessageID) + sizeof(unsigned int)*2 + sizeof(unsigned int) + BITS_TO_BYTES(splitPacketChannelList[index]->splitPacketList[0]->dataBitLength);
 		progressIndicator->data = new unsigned char [length];
 		progressIndicator->dataBitLength=BYTES_TO_BITS(length);
-		progressIndicator->data[0]=(MessageID)ID_DOWNLOAD_PROGRESS;
+		// progressIndicator->data[0]=(MessageID)ID_DOWNLOAD_PROGRESS;
 		unsigned int temp;
 		temp=splitPacketChannelList[index]->splitPacketList.Size();
 		memcpy(progressIndicator->data+sizeof(MessageID), &temp, sizeof(unsigned int));
@@ -2162,9 +2173,8 @@ InternalPacket * ReliabilityLayer::BuildPacketFromSplitPacketList( SplitPacketId
 	bool objectExists;
 
 	i=splitPacketChannelList.GetIndexFromKey(splitPacketId, &objectExists);
-#ifndef NDEBUG
+
 	RakAssert(objectExists);
-#endif
 
 	if (splitPacketChannelList[i]->splitPacketList.Size()==splitPacketChannelList[i]->splitPacketList[0]->splitPacketCount)
 	{
@@ -2269,9 +2279,7 @@ DataStructures::LinkedList<InternalPacket*> *ReliabilityLayer::GetOrderingListAt
 //-------------------------------------------------------------------------------------------------------
 void ReliabilityLayer::AddToOrderingList( InternalPacket * internalPacket )
 {
-#ifndef NDEBUG
 	RakAssert( internalPacket->orderingChannel < NUMBER_OF_ORDERED_STREAMS );
-#endif
 
 	if ( internalPacket->orderingChannel >= NUMBER_OF_ORDERED_STREAMS )
 	{

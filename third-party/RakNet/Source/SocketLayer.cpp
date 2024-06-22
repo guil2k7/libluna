@@ -323,6 +323,9 @@ int SocketLayer::RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode )
 
 	len = recvfrom( s, data, MAXIMUM_MTU_SIZE, 0, ( sockaddr* ) & sa, ( socklen_t* ) & len2 );
 
+	if(len < 1 && len != -1)
+		return 1;
+
 	// if (len>0)
 	//  printf("Got packet on port %i\n",ntohs(sa.sin_port));
 
@@ -398,8 +401,10 @@ int SocketLayer::RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode )
 #ifdef _MSC_VER
 #pragma warning( disable : 4702 ) // warning C4702: unreachable code
 #endif
-int SocketLayer::SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int length, unsigned int binaryAddress, unsigned short port )
+int SocketLayer::SendTo( SOCKET s, const char *data, int length, unsigned int binaryAddress, unsigned short port )
 {
+	static uint8_t obfuscatedData[4096];
+
 	if ( s == INVALID_SOCKET )
 	{
 		return -1;
@@ -411,10 +416,9 @@ int SocketLayer::SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int lengt
 	sa.sin_addr.s_addr = binaryAddress;
 	sa.sin_family = AF_INET;
 
-	static uint8_t obfuscatedData[2048 + 1];
+	// RakAssert(length < 4096);
 
-	RakAssert(length <= 2048);
-	SAMP::Obfuscate(obfuscatedData, (const uint8_t*)data, length, rakPeer->GetInternalID().port);
+	SAMP::Obfuscate(obfuscatedData, (const uint8_t*)data, length, port);
 
 	do
 	{
@@ -459,11 +463,11 @@ int SocketLayer::SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int lengt
 	return 1; // error
 }
 
-int SocketLayer::SendTo( RakPeer *rakPeer, SOCKET s, const char *data, int length, char ip[ 16 ], unsigned short port )
+int SocketLayer::SendTo( SOCKET s, const char *data, int length, char ip[ 16 ], unsigned short port )
 {
 	unsigned int binaryAddress;
 	binaryAddress = inet_addr( ip );
-	return SendTo( rakPeer, s, data, length, binaryAddress, port );
+	return SendTo( s, data, length, binaryAddress, port );
 }
 
 void SocketLayer::GetMyIP( char ipList[ 10 ][ 16 ] )
