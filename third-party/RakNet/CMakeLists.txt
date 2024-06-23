@@ -4,6 +4,7 @@ project(RakNet VERSION 2.52 LANGUAGES C CXX)
 option(THREAD_SAFE OFF)
 
 set(RAKNET_SOURCES
+    Source/SAMP/Auth.cpp
     Source/SAMP/Obfuscator.cpp
     Source/BitStream.cpp
     Source/CheckSum.cpp

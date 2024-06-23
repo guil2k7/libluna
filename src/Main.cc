@@ -50,13 +50,13 @@ public:
         ImGui::InputText("IP or Host", host, sizeof host);
 
         if (ImGui::Button("Connect")) {
-            CConnectData connectData;
+            CConnectionParams connectionParams;
 
-            connectData.Host = std::string_view(host);
-            connectData.Port = 7777;
-            connectData.Nickname = "guil2k7_luna";
+            connectionParams.Nickname = "guil2k7_luna";
+            connectionParams.Host = std::string_view(host);
+            connectionParams.Port = 7777;
 
-            client->SetConnectData(connectData);
+            client->SetConnectionParams(connectionParams);
             client->Connect();
         }
 

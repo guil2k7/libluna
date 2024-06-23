@@ -1,13 +1,12 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
 
-#include "spdlog/spdlog.h"
 #include <Luna/Network/Client.hh>
-#include <Luna/Network/Auth.hh>
 #include <Luna/Network/Code/Core.hh>
 #include <Luna/BitSerde.hh>
 #include <RakNet/RakNetworkFactory.h>
 #include <RakNet/PacketEnumerations.h>
 #include <RakNet/MTUSize.h>
+#include <spdlog/spdlog.h>
 
 using namespace Luna;
 using namespace Luna::Network;
@@ -24,11 +23,11 @@ CClient::~CClient() {
     RakNet::RakNetworkFactory::DestroyRakPeerInterface(m_RakPeer);
 }
 
-bool CClient::SetConnectData(CConnectData const& data) {
+bool CClient::SetConnectionParams(CConnectionParams const& params) {
     if (m_State != CLIENT_STATE_DISCONNECTED)
         return false;
 
-    m_ConnectData = data;
+    m_ConnectionParams = params;
 
     return true;
 }
@@ -36,8 +35,9 @@ bool CClient::SetConnectData(CConnectData const& data) {
 void CClient::Connect() {
     m_RakPeer->Disconnect(100);
     m_RakPeer->Initialize(1, 0, 30);
+    m_RakPeer->Connect(m_ConnectionParams.Host.data(), m_ConnectionParams.Port, nullptr, 0);
 
-    m_RakPeer->Connect(m_ConnectData.Host.data(), m_ConnectData.Port, nullptr, 0);
+    m_ServerAddr = m_RakPeer->GetServerID();
     m_State = CLIENT_STATE_CONNECTING;
 }
 
@@ -48,6 +48,8 @@ void CClient::Process() {
     RakNet::Packet* packet = m_RakPeer->Receive();
 
     while (packet != nullptr) {
+        spdlog::info("Processing packet: {}", packet->data[0]);
+
         if (m_State != CLIENT_STATE_CONNECTED)
             ProcessPreConnection(packet);
         else
@@ -58,9 +60,9 @@ void CClient::Process() {
     }
 }
 
-void CClient::SendPacket(IPacketSerializable& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability) {
+void CClient::SendPacket(IPacketSerializable const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability) {
     uint8_t buffer[MAXIMUM_MTU_SIZE];
-    CSerializer serializer(buffer, MAXIMUM_MTU_SIZE);
+    CSerializer serializer(&buffer[0], MAXIMUM_MTU_SIZE);
 
     if (packet.IsRPC()) {
         serializer.SerializeObject(packet);
@@ -70,7 +72,7 @@ void CClient::SendPacket(IPacketSerializable& packet, RakNet::PacketPriority pri
             reinterpret_cast<char const*>(buffer),
             serializer.OffsetInBits(),
             priority, reliability,
-            0, RakNet::UNASSIGNED_PLAYER_ID, false, false
+            0, m_ServerAddr, false, false
         );
     }
     else {
@@ -81,16 +83,21 @@ void CClient::SendPacket(IPacketSerializable& packet, RakNet::PacketPriority pri
             reinterpret_cast<char const*>(buffer),
             serializer.OffsetInBytes(),
             priority, reliability,
-            0, RakNet::UNASSIGNED_PLAYER_ID, false
+            0, m_ServerAddr, false
         );
     }
+}
+
+void CClient::RetryConnect() {
+    m_RakPeer->Connect(m_ConnectionParams.Host.data(), m_ConnectionParams.Port, nullptr, 0);
+    m_State = CLIENT_STATE_CONNECTING;
 }
 
 void CClient::ProcessPreConnection(RakNet::Packet* packet) {
     switch (packet->data[0]) {
     case RakNet::ID_AUTH_KEY:
+        // Unrechable
         spdlog::info("ID_AUTH_KEY");
-        ProcessAuthRequest(packet);
         break;
 
     case RakNet::ID_CONNECTION_REQUEST_ACCEPTED:
@@ -100,7 +107,16 @@ void CClient::ProcessPreConnection(RakNet::Packet* packet) {
 
     case RakNet::ID_CONNECTION_ATTEMPT_FAILED:
         spdlog::info("Connection attempt failed. Retrying...");
-        Connect();
+        RetryConnect();
+        break;
+
+    case RakNet::ID_RPC:
+        spdlog::info("Processing RPC: {}", packet->data[1]);
+        ProcessRPC(packet);
+        break;
+
+    case RakNet::ID_MODIFIED_PACKET:
+        spdlog::info("ID_MODIFIED_PACKET");
         break;
     }
 }
@@ -118,18 +134,6 @@ void CClient::ProcessPostConnection(RakNet::Packet* packet) {
     }
 }
 
-void CClient::ProcessAuthRequest(RakNet::Packet* packet) {
-    CDeserializer deserializer(packet->data + 1, BitsToBytes(packet->bitSize));
-
-    Code::CAuthRequest request;
-    deserializer.DeserializeObject(request);
-
-    Code::CAuthResponse response;
-    response.auth = GenerateAuthKey(request.auth);
-
-    SendPacket(response, RakNet::SYSTEM_PRIORITY, RakNet::RELIABLE);
-}
-
 void CClient::ProcessConnectionRequestAccepted(RakNet::Packet* packet) {
     m_State = CLIENT_STATE_CONNECTED;
 
@@ -141,7 +145,7 @@ void CClient::ProcessConnectionRequestAccepted(RakNet::Packet* packet) {
     Code::CClientJoin response;
     response.Version = 4057;
     response.Mod = 1;
-    response.Nickname = m_ConnectData.Nickname;
+    response.Nickname = m_ConnectionParams.Nickname;
     response.ClientChallengeResponse = data.SampToken ^ 4057;
     response.Auth = "15121F6F18550C00AC4B4F8A167D0379BB0ACA99043";
     response.ClientVersion = "0.3.7";

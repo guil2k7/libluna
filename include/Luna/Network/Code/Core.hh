@@ -5,35 +5,9 @@
 #include "../Packet.hh"
 #include "RakNet/NetworkTypes.h"
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 namespace Luna::Network::Code {
-    struct CAuthRequest final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(12, false)
-
-        void Deserialize(BitSerde::CDeserializer& deserializer) override {
-            uint8_t length = deserializer.DeserializeU8() - 1;
-
-            auth.resize(length);
-            deserializer.DeserializeBytes(
-                reinterpret_cast<uint8_t*>(auth.data()), length);
-        }
-
-        std::string auth;
-    };
-
-    struct CAuthResponse final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(12, false)
-
-        void Serialize(BitSerde::CSerializer& serializer) const override {
-            serializer.SerializeU8(auth.length());
-            serializer.SerializeBytes(
-                reinterpret_cast<uint8_t const*>(auth.data()), auth.length());
-        }
-
-        std::string auth;
-    };
-
     struct CConnectionRequestAccepted final : public IPacketDeserializable {
         LUNA_DEFINE_PACKET(34, false)
 

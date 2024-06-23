@@ -47,8 +47,10 @@ void CDeserializer::DeserializeBytes(uint8_t* dest, size_t length) {
     if ((m_OffsetInBits % 8) != 0)
         return DeserializeBits(dest, length * 8);
 
+    #ifndef NDEBUG
     if (BitsToBytes(m_OffsetInBits) + length > m_Length)
         throw CNoBytesLeft();
+    #endif
 
     memcpy(dest, m_Data + (m_OffsetInBits >> 3), length);
     m_OffsetInBits += length * 8;

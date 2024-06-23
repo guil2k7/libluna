@@ -229,6 +229,7 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 
 					if (internalPacket->data)
 						delete [] internalPacket->data;
+
 					internalPacketPool.ReleasePointer( internalPacket );
 				}
 
@@ -250,6 +251,7 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 		{
 			if (internalPacket->data)
 				delete [] internalPacket->data;
+
 			internalPacketPool.ReleasePointer( internalPacket );
 		}
 	}
@@ -268,11 +270,11 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 		sendPacketSet[ i ].ClearAndForceAllocation( 32 ); // Preallocate the send lists so we don't do a bunch of reallocations unnecessarily
 	}
 
-// #ifndef NDEBUG
-// 	for (unsigned i = 0; i < delayList.Size(); i++ )
-// 		delete delayList[ i ];
-// 	delayList.Clear();
-// #endif
+#ifndef NDEBUG
+	for (unsigned i = 0; i < delayList.Size(); i++ )
+		delete delayList[ i ];
+	delayList.Clear();
+#endif
 
 	internalPacketPool.ClearPool();
 
@@ -434,6 +436,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 				// Duplicate packet
 				if (internalPacket->data)
 					delete [] internalPacket->data;
+
 				internalPacketPool.ReleasePointer( internalPacket );
 				goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 			}
@@ -453,6 +456,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					// Duplicate packet
 					if (internalPacket->data)
 						delete [] internalPacket->data;
+
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -500,7 +504,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 
 					if (internalPacket->data)
 						delete [] internalPacket->data;
-					
+
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -595,7 +599,7 @@ bool ReliabilityLayer::HandleSocketReceiveFromConnectedPlayer( const char *buffe
 					// Invalid packet
 					if (internalPacket->data)
 						delete [] internalPacket->data;
-					
+
 					internalPacketPool.ReleasePointer( internalPacket );
 					goto CONTINUE_SOCKET_DATA_PARSE_LOOP;
 				}
@@ -1213,10 +1217,10 @@ unsigned ReliabilityLayer::GenerateDatagram( BitStream *output, int MTUSize, boo
 		if ( internalPacket->nextActionTime == 0 )
 		{
 			resendQueue.Pop();
-			
+
 			if (internalPacket->data)
 				delete [] internalPacket->data;
-			
+
 			internalPacketPool.ReleasePointer( internalPacket );
 			continue; // This was a hole
 		}
@@ -1303,7 +1307,7 @@ unsigned ReliabilityLayer::GenerateDatagram( BitStream *output, int MTUSize, boo
 				// Unreliable packets are deleted
 				if (internalPacket->data)
 					delete [] internalPacket->data;
-				
+
 				internalPacketPool.ReleasePointer( internalPacket );
 				continue;
 			}
@@ -1864,7 +1868,7 @@ InternalPacket* ReliabilityLayer::CreateInternalPacketFromBitStream( BitStream *
 	{
 		if (internalPacket->data)
 			delete [] internalPacket->data;
-		
+
 		internalPacketPool.ReleasePointer( internalPacket );
 		return 0;
 	}
@@ -1921,10 +1925,10 @@ void ReliabilityLayer::DeleteSequencedPacketsInList( unsigned char orderingChann
 		{
 			InternalPacket * internalPacket = theList[ i ];
 			theList.RemoveAtIndex( i );
-			
+
 			if (internalPacket->data)
 				delete [] internalPacket->data;
-			
+
 			internalPacketPool.ReleasePointer( internalPacket );
 		}
 
@@ -1949,7 +1953,7 @@ void ReliabilityLayer::DeleteSequencedPacketsInList( unsigned char orderingChann
 		{
 			internalPacket = theList[ i ];
 			theList.Del( i );
-			
+
 			if (internalPacket->data)
 				delete [] internalPacket->data;
 

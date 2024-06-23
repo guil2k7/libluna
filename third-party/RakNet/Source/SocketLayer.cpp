@@ -25,7 +25,7 @@
 #include "RakAssert.h"
 #include "RakPeer.h"
 #include "MTUSize.h"
-#include "SAMP/Obfuscator.h"
+#include "SAMP/SAMP.h"
 
 using namespace RakNet;
 
@@ -403,8 +403,6 @@ int SocketLayer::RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode )
 #endif
 int SocketLayer::SendTo( SOCKET s, const char *data, int length, unsigned int binaryAddress, unsigned short port )
 {
-	static uint8_t obfuscatedData[4096];
-
 	if ( s == INVALID_SOCKET )
 	{
 		return -1;
@@ -416,8 +414,7 @@ int SocketLayer::SendTo( SOCKET s, const char *data, int length, unsigned int bi
 	sa.sin_addr.s_addr = binaryAddress;
 	sa.sin_family = AF_INET;
 
-	// RakAssert(length < 4096);
-
+	uint8_t obfuscatedData[MAXIMUM_MTU_SIZE];
 	SAMP::Obfuscate(obfuscatedData, (const uint8_t*)data, length, port);
 
 	do

@@ -723,14 +723,13 @@ namespace RakNet
 	template <class templateType>
 		inline void BitStream::Write(templateType var)
 	{
-#ifdef _MSC_VER
-#pragma warning(disable:4127)   // conditional expression is constant
-#endif
-		if (sizeof(var)==1)
+#ifdef _RAK_BITSTREAM_NATIVE_END
+		WriteBits( ( unsigned char* ) & var, sizeof( templateType ) * 8, true );
+#else
+		if constexpr (sizeof(templateType)==1)
 			WriteBits( ( unsigned char* ) & var, sizeof( templateType ) * 8, true );
 		else
 		{
-#ifndef _RAK_BITSTREAM_NATIVE_END
 			if (DoEndianSwap())
 			{
 				unsigned char output[sizeof(templateType)];
@@ -738,9 +737,9 @@ namespace RakNet
 				WriteBits( ( unsigned char* ) output, sizeof(templateType) * 8, true );
 			}
 			else
-#endif
 				WriteBits( ( unsigned char* ) & var, sizeof(templateType) * 8, true );
 		}
+#endif
 	}
 
 	template <class sizeType>

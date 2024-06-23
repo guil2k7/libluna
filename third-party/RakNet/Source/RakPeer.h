@@ -221,6 +221,10 @@ public:
 	/// \return The PlayerID
 	PlayerID GetPlayerIDFromIndex( int index );
 
+	/// Returns the PlayerID of the server to which we are connected/connecting.
+	/// \return The PlayerID of the server
+	PlayerID GetServerID( void );
+
 	/// Bans an IP from connecting.  Banned IPs persist between connections but are not saved on shutdown nor loaded on startup.
 	/// param[in] IP Dotted IP address. Can use * as a wildcard, such as 128.0.0.* will ban all IP addresses starting with 128.0.0
 	/// \param[in] milliseconds how many ms for a temporary ban.  Use 0 for a permanent ban
@@ -516,6 +520,8 @@ protected:
 	void ParseConnectionRequestPacket( RakPeer::RemoteSystemStruct *remoteSystem, PlayerID playerId, const char *data, int byteSize);
 	///When we get a connection request from an ip / port, accept it unless full
 	void OnConnectionRequest( RakPeer::RemoteSystemStruct *remoteSystem, unsigned char *AESKey, bool setAESKey );
+	/// --- 
+	bool ParseAuthPacket(PlayerID playerId, uint8_t const* data, size_t size);
 	///Send a reliable disconnect packet to this player and disconnect them when it is delivered
 	void NotifyAndFlagForDisconnect( const PlayerID playerId, bool performImmediate, unsigned char orderingChannel );
 	///Returns how many remote systems initiated a connection to us
@@ -724,6 +730,9 @@ protected:
 	DataStructures::SingleProducerConsumer<Packet*> packetSingleProducerConsumer;
 	//DataStructures::Queue<Packet*> pushedBackPacket, outOfOrderDeallocatedPacket;
 	DataStructures::Queue<Packet*> packetPool;
+
+	// TODO: Remove this.
+	PlayerID serverAddr;
 };
 
 } // namespace RakNet
