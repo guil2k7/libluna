@@ -801,8 +801,8 @@ bool RakPeer::Send( const char *data, const int length, PacketPriority priority,
 		if (router && GetIndexFromPlayerID(playerId)==-1)
 		    return router->Send(data, BYTES_TO_BITS(length), priority, reliability, orderingChannel, playerId);
 	}
-	else
-		SendBuffered(data, length*8, priority, reliability, orderingChannel, playerId, broadcast, RemoteSystemStruct::NO_ACTION);
+
+	SendBuffered(data, length*8, priority, reliability, orderingChannel, playerId, broadcast, RemoteSystemStruct::NO_ACTION);
 
 	return true;
 }

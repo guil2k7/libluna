@@ -3,6 +3,7 @@
 #pragma once
 
 #include "../Packet.hh"
+#include "../../BitSerde.hh"
 #include "../../Game/Vector.hh"
 #include <cstdint>
 #include <string>
@@ -14,8 +15,8 @@ namespace Luna::Network::Code {
         SERVER_QUIT_REASON_KICK_OR_BAN,
     };
 
-    struct CAimSync final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(20, false)
+    struct CAimSync final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(false, 20)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
             serializer.SerializeU8(CamMode);
@@ -36,8 +37,8 @@ namespace Luna::Network::Code {
     };
 
     // TODO: 
-    // struct CWeaponsUpdate final : public IPacketSerializable {
-    //     LUNA_DEFINE_PACKET(204, false)
+    // struct CWeaponsUpdate final : public BitSerde::ISerializable {
+    //     LUNA_DEFINE_PACKET(false, 204)
 
     //     uint8_t Slot0, Weapon0;   uint16_t Ammo0;
     //     uint8_t Slot1, Weapon1;   uint16_t Ammo1;
@@ -53,8 +54,8 @@ namespace Luna::Network::Code {
     //     uint8_t Slot11, Weapon11; uint16_t Ammo11;
     // };
 
-    struct CStatsUpdate final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(205, false)
+    struct CStatsUpdate final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(false, 205)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
             serializer.SerializeI32(Money);
@@ -65,8 +66,8 @@ namespace Luna::Network::Code {
         int32_t DrunkLevel;
     };
 
-    struct CBulletSync final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(206, false)
+    struct CBulletSync final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(false, 206)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
             serializer.SerializeU8(HitType);
@@ -85,8 +86,8 @@ namespace Luna::Network::Code {
         uint8_t WeaponID;
     };
 
-    struct COnFootSync final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(207, false)
+    struct COnFootSync final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(false, 207)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
             serializer.SerializeU16(LrKey);
@@ -121,8 +122,8 @@ namespace Luna::Network::Code {
     };
 
     // TODO: Move to vehicle component.
-    // struct CUnoccupiedSync final : public IPacketSerializable {
-    //     LUNA_DEFINE_PACKET(209, false)
+    // struct CUnoccupiedSync final : public BitSerde::ISerializable {
+    //     LUNA_DEFINE_PACKET(false, 209)
 
     //     uint16_t VehicleID;
     //     uint8_t SeatID;
@@ -134,8 +135,8 @@ namespace Luna::Network::Code {
     // };
 
     // TODO: Move to vehicle component.
-    // struct CTrailerSync final : public IPacketSerializable {
-    //     LUNA_DEFINE_PACKET(210, false)
+    // struct CTrailerSync final : public BitSerde::ISerializable {
+    //     LUNA_DEFINE_PACKET(false, 210)
 
     //     uint16_t TrailerID;
     //     Game::CVector Pos;
@@ -144,8 +145,8 @@ namespace Luna::Network::Code {
     //     Game::CVector AngularVelocity;
     // };
 
-    // struct CPassengerSync final : public IPacketSerializable {
-    //     LUNA_DEFINE_PACKET(211, false)
+    // struct CPassengerSync final : public BitSerde::ISerializable {
+    //     LUNA_DEFINE_PACKET(false, 211)
 
     //     uint16_t VehicleID;
     //     uint8_t DriveBy : 2;
@@ -160,8 +161,8 @@ namespace Luna::Network::Code {
     //     Game::CVector Pos;
     // };
 
-    struct CSpectatingSync final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(212, false)
+    struct CSpectatingSync final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(false, 212)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
             serializer.SerializeU16(LrKey);
@@ -176,8 +177,8 @@ namespace Luna::Network::Code {
         Game::CVector Pos;
     };
 
-    struct CSetPlayerFacingAngle final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(19, true)
+    struct CSetPlayerFacingAngle final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 19)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Angle = deserializer.DeserializeF32();
@@ -186,8 +187,8 @@ namespace Luna::Network::Code {
         float Angle;
     };
 
-    struct CServerJoin final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(137, true)
+    struct CServerJoin final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 137)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -207,8 +208,8 @@ namespace Luna::Network::Code {
         // Additional Information: Keeping color parameter as 0 will make random color on each client.
     };
 
-    struct CServerQuit final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(138, true)
+    struct CServerQuit final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 138)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -219,8 +220,8 @@ namespace Luna::Network::Code {
         eServerQuitReason reason;
     };
 
-    struct CInitGame final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(139, true)
+    struct CInitGame final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 139)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             ZoneNames = deserializer.DeserializeBool();
@@ -290,8 +291,8 @@ namespace Luna::Network::Code {
         // Additional Information: vehicleModels is an array of used vehicle models with size 212.
     };
 
-    struct CUpdateScoresAndPings final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(155, true)
+    struct CUpdateScoresAndPings final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 155)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -304,8 +305,8 @@ namespace Luna::Network::Code {
         uint32_t Ping;
     };
 
-    struct CClientCheck final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(103, true)
+    struct CClientCheck final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 103)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Type = deserializer.DeserializeU8();
@@ -320,16 +321,16 @@ namespace Luna::Network::Code {
         uint16_t Count;
     };
 
-    struct CGameModeRestart final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(40, true)
+    struct CGameModeRestart final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 40)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
 
         // Additional Information: This RPC reconnects a player to the server showing him "The server is restarting..." message.
     };
 
-    struct CApplyPlayerAnimation final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(86, true)
+    struct CApplyPlayerAnimation final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 86)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -361,8 +362,8 @@ namespace Luna::Network::Code {
         uint32_t Time;
     };
 
-    struct CClearPlayerAnimation final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(87, true)
+    struct CClearPlayerAnimation final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 87)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -371,8 +372,8 @@ namespace Luna::Network::Code {
         uint16_t PlayerID;
     };
 
-    struct CDeathBroadcast final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(166, true)
+    struct CDeathBroadcast final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 166)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -381,8 +382,8 @@ namespace Luna::Network::Code {
         uint16_t PlayerID;
     };
 
-    struct CSetPlayerName final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(11, true)
+    struct CSetPlayerName final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 11)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -401,8 +402,8 @@ namespace Luna::Network::Code {
         // Additional Information: Keep success parameter as 1.
     };
 
-    struct CSetPlayerPos final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(12, true)
+    struct CSetPlayerPos final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 12)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             X = deserializer.DeserializeF32();
@@ -415,8 +416,8 @@ namespace Luna::Network::Code {
         float Z;
     };
 
-    struct CSetPlayerPosFindZ final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(13, true)
+    struct CSetPlayerPosFindZ final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 13)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             X = deserializer.DeserializeF32();
@@ -429,8 +430,8 @@ namespace Luna::Network::Code {
         float Z;
     };
 
-    struct CSetPlayerSkillLevel final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(34, true)
+    struct CSetPlayerSkillLevel final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 34)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -443,8 +444,8 @@ namespace Luna::Network::Code {
         uint16_t Level;
     };
 
-    struct CSetPlayerSkin final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(153, true)
+    struct CSetPlayerSkin final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 153)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU32();
@@ -455,8 +456,8 @@ namespace Luna::Network::Code {
         uint32_t SkinID;
     };
 
-    struct CSetPlayerTime final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(29, true)
+    struct CSetPlayerTime final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 29)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Hour = deserializer.DeserializeU8();
@@ -467,8 +468,8 @@ namespace Luna::Network::Code {
         uint8_t Minute;
     };
 
-    struct CSetPlayerSpecialAction final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(88, true)
+    struct CSetPlayerSpecialAction final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 88)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             ActionID = deserializer.DeserializeU8();
@@ -477,8 +478,8 @@ namespace Luna::Network::Code {
         uint8_t ActionID;
     };
 
-    struct CSetWeather final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(152, true)
+    struct CSetWeather final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 152)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             WeatherID = deserializer.DeserializeU8();
@@ -487,8 +488,8 @@ namespace Luna::Network::Code {
         uint8_t WeatherID;
     };
 
-    struct CSetWorldBounds final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(17, true)
+    struct CSetWorldBounds final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 17)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             MaxX = deserializer.DeserializeF32();
@@ -503,8 +504,8 @@ namespace Luna::Network::Code {
         float MinY;
     };
 
-    struct CSetPlayerVelocity final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(90, true)
+    struct CSetPlayerVelocity final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 90)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             X = deserializer.DeserializeF32();
@@ -517,8 +518,8 @@ namespace Luna::Network::Code {
         float Z;
     };
 
-    struct CTogglePlayerControllable final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(15, true)
+    struct CTogglePlayerControllable final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 15)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Moveable = deserializer.DeserializeU8();
@@ -527,8 +528,8 @@ namespace Luna::Network::Code {
         bool Moveable;
     };
 
-    struct CTogglePlayerSpectating final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(124, true)
+    struct CTogglePlayerSpectating final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 124)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Spectating = deserializer.DeserializeU32();
@@ -537,8 +538,8 @@ namespace Luna::Network::Code {
         bool Spectating;
     };
 
-    struct CToggleClock final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(30, true)
+    struct CToggleClock final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 30)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Toggle = deserializer.DeserializeU8();
@@ -547,8 +548,8 @@ namespace Luna::Network::Code {
         bool Toggle;
     };
 
-    struct CSetPlayerTeam final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(69, true)
+    struct CSetPlayerTeam final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 69)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -559,8 +560,8 @@ namespace Luna::Network::Code {
         uint8_t TeamID;
     };
 
-    struct CPlaySound final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(16, true)
+    struct CPlaySound final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 16)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             SoundID = deserializer.DeserializeU32();
@@ -575,8 +576,8 @@ namespace Luna::Network::Code {
         float Z;
     };
 
-    struct CGivePlayerMoney final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(18, true)
+    struct CGivePlayerMoney final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 18)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Money = deserializer.DeserializeI32();
@@ -585,20 +586,20 @@ namespace Luna::Network::Code {
         int32_t Money;
     };
 
-    struct CResetPlayerMoney final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(20, true)
+    struct CResetPlayerMoney final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 20)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
     };
 
-    struct CResetPlayerWeapons final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(21, true)
+    struct CResetPlayerWeapons final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 21)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
     };
 
-    struct CGivePlayerWeapon final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(22, true)
+    struct CGivePlayerWeapon final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 22)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             WeaponID = deserializer.DeserializeU32();
@@ -609,8 +610,8 @@ namespace Luna::Network::Code {
         uint32_t Bullets;
     };
 
-    struct CPlayAudioStream final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(41, true)
+    struct CPlayAudioStream final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 41)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             uint8_t urlLength = deserializer.DeserializeU8();
@@ -632,8 +633,8 @@ namespace Luna::Network::Code {
         bool UsePos;
     };
 
-    struct CPlayCrimeReport final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(112, true)
+    struct CPlayCrimeReport final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 112)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             SuspectID = deserializer.DeserializeU16();
@@ -656,14 +657,14 @@ namespace Luna::Network::Code {
         float Z;
     };
 
-    struct CStopAudioStream final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(42, true)
+    struct CStopAudioStream final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 42)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
     };
 
-    struct CRemoveBuilding final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(43, true)
+    struct CRemoveBuilding final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 43)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             ObjectModel = deserializer.DeserializeU32();
@@ -680,8 +681,8 @@ namespace Luna::Network::Code {
         float Radius;
     };
 
-    struct CSetPlayerHealth final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(14, true)
+    struct CSetPlayerHealth final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 14)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Health = deserializer.DeserializeF32();
@@ -690,8 +691,8 @@ namespace Luna::Network::Code {
         float Health;
     };
 
-    struct CSetPlayerArmour final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(66, true)
+    struct CSetPlayerArmour final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 66)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Armour = deserializer.DeserializeF32();
@@ -700,8 +701,8 @@ namespace Luna::Network::Code {
         float Armour;
     };
 
-    struct CSetWeaponAmmo final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(145, true)
+    struct CSetWeaponAmmo final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 145)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             WeaponID = deserializer.DeserializeU8();
@@ -712,14 +713,14 @@ namespace Luna::Network::Code {
         uint16_t Ammo;
     };
 
-    struct CSetCameraBehind final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(162, true)
+    struct CSetCameraBehind final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 162)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
     };
 
-    struct CSetArmedWeapon final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(67, true)
+    struct CSetArmedWeapon final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 67)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             WeaponID = deserializer.DeserializeU32();
@@ -728,8 +729,8 @@ namespace Luna::Network::Code {
         uint32_t WeaponID;
     };
 
-    struct CWorldPlayerAdd final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(32, true)
+    struct CWorldPlayerAdd final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 32)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -756,8 +757,8 @@ namespace Luna::Network::Code {
         uint16_t SkillLevel[11];
     };
 
-    struct CWorldPlayerRemove final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(163, true)
+    struct CWorldPlayerRemove final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 163)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -766,8 +767,8 @@ namespace Luna::Network::Code {
         uint16_t PlayerID;
     };
 
-    struct CInterpolateCamera final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(82, true)
+    struct CInterpolateCamera final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 82)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PosSet = deserializer.DeserializeBool();
@@ -792,8 +793,8 @@ namespace Luna::Network::Code {
         uint8_t CutType;
     };
 
-    struct CCreateExplosion final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(79, true)
+    struct CCreateExplosion final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 79)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             X = deserializer.DeserializeF32();
@@ -810,8 +811,8 @@ namespace Luna::Network::Code {
         float Radius;
     };
 
-    struct CSendDeathMessage final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(55, true)
+    struct CSendDeathMessage final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 55)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             KillerID = deserializer.DeserializeU16();
@@ -824,8 +825,8 @@ namespace Luna::Network::Code {
         uint8_t Reason;
     };
 
-    struct CSendGameTimeUpdate final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(60, true)
+    struct CSendGameTimeUpdate final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 60)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Time = deserializer.DeserializeI32();
@@ -834,8 +835,8 @@ namespace Luna::Network::Code {
         int32_t Time;
     };
 
-    struct CSendClientMessage final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(93, true)
+    struct CSendClientMessage final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 93)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Color = deserializer.DeserializeU32();
@@ -849,8 +850,8 @@ namespace Luna::Network::Code {
         std::string Message;
     };
 
-    struct CSetShopName final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(33, true)
+    struct CSetShopName final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 33)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             uint32_t length = deserializer.DeserializeU32();
@@ -862,8 +863,8 @@ namespace Luna::Network::Code {
         std::string Name;
     };
 
-    struct CSetPlayerDrunkLevel final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(35, true)
+    struct CSetPlayerDrunkLevel final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 35)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             DrunkLevel = deserializer.DeserializeI32();
@@ -872,8 +873,8 @@ namespace Luna::Network::Code {
         int32_t DrunkLevel;
     };
 
-    struct CSetPlayerFightingStyle final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(89, true)
+    struct CSetPlayerFightingStyle final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 89)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -884,8 +885,8 @@ namespace Luna::Network::Code {
         uint8_t FightStyle;
     };
 
-    struct CSetInterior final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(156, true)
+    struct CSetInterior final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 156)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             InteriorID = deserializer.DeserializeU8();
@@ -894,8 +895,8 @@ namespace Luna::Network::Code {
         uint8_t InteriorID;
     };
 
-    struct CSetPlayerColor final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(72, true)
+    struct CSetPlayerColor final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 72)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             PlayerID = deserializer.DeserializeU16();
@@ -906,14 +907,14 @@ namespace Luna::Network::Code {
         uint32_t Color;
     };
 
-    struct CForceClassSelection final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(74, true)
+    struct CForceClassSelection final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 74)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {}
     };
 
-    struct CToggleWidescreen final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(111, true)
+    struct CToggleWidescreen final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 111)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             Enable = deserializer.DeserializeU8();
@@ -922,8 +923,8 @@ namespace Luna::Network::Code {
         uint8_t Enable;
     };
 
-    struct CSetPlayerWantedLevel final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(133, true)
+    struct CSetPlayerWantedLevel final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 133)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             WantedLevel = deserializer.DeserializeU8();
@@ -932,8 +933,8 @@ namespace Luna::Network::Code {
         uint8_t WantedLevel;
     };
 
-    struct CSetCameraPos final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(157, true)
+    struct CSetCameraPos final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 157)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             LookPosX = deserializer.DeserializeF32();
@@ -946,8 +947,8 @@ namespace Luna::Network::Code {
         float LookPosZ;
     };
 
-    struct CSetCameraLookAt final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(158, true)
+    struct CSetCameraLookAt final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(true, 158)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
             LookPosX = deserializer.DeserializeF32();

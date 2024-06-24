@@ -2,20 +2,22 @@
 
 #pragma once
 
-#include "../BitSerde.hh"
-#include <RakNet/PacketPriority.h>
 #include <cstdint>
 
 namespace Luna::Network {
-    struct IPacketHeader {
-        virtual uint8_t ID() const = 0;
-        virtual bool IsRPC() const = 0;
-    };
+    typedef uint8_t PacketID;
 
-    struct IPacketSerializable : public IPacketHeader, public BitSerde::ISerializable {};
-    struct IPacketDeserializable : public IPacketHeader, public BitSerde::IDeserializable {};
+    #define LUNA_DEFINE_PACKET(isRPC, id) \
+    static constexpr bool PACKET_IS_RPC = isRPC; \
+    static constexpr PacketID PACKET_ID = id;
 
-    #define LUNA_DEFINE_PACKET(id, isRPC) \
-    inline uint8_t ID() const override { return id; } \
-    inline bool IsRPC() const override { return isRPC; }
+    template<typename T>
+    inline constexpr bool IsRPC() {
+        return T::PACKET_IS_RPC;
+    }
+
+    template<typename T>
+    inline constexpr PacketID GetPacketID() {
+        return T::PACKET_ID;
+    }
 }

@@ -3,16 +3,17 @@
 #pragma once
 
 #include "../Packet.hh"
+#include "../../BitSerde.hh"
 #include "RakNet/NetworkTypes.h"
 #include <cstdint>
 #include <string_view>
 
 namespace Luna::Network::Code {
-    struct CConnectionRequestAccepted final : public IPacketDeserializable {
-        LUNA_DEFINE_PACKET(34, false)
+    struct CConnectionRequestAccepted final : public BitSerde::IDeserializable {
+        LUNA_DEFINE_PACKET(false, 34)
 
         void Deserialize(BitSerde::CDeserializer& deserializer) override {
-            deserializer.SkipBytes(7);
+            deserializer.SkipBytes(6);
             PlayerIndex = deserializer.DeserializeU16();
             SampToken = deserializer.DeserializeU32();
         }
@@ -21,26 +22,30 @@ namespace Luna::Network::Code {
         uint32_t SampToken;
     };
 
-    struct CClientJoin final : public IPacketSerializable {
-        LUNA_DEFINE_PACKET(25, true)
+    struct CClientLogin final : public BitSerde::ISerializable {
+        LUNA_DEFINE_PACKET(true, 25)
 
         void Serialize(BitSerde::CSerializer& serializer) const override {
-            serializer.SerializeU8(Version);
-            serializer.SerializeU8(Mod);
+            serializer.SerializeU32(ClientVersion);
+            serializer.SerializeU8(Modded);
             serializer.SerializeU8(Nickname.length());
+            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(Nickname.data()), Nickname.length());
             serializer.SerializeU32(ClientChallengeResponse);
             serializer.SerializeU8(Auth.length());
             serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(Auth.data()), Auth.length());
-            serializer.SerializeU8(ClientVersion.length());
-            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(ClientVersion.data()), ClientVersion.length());
+            serializer.SerializeU8(ClientVersionString.length());
+            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(ClientVersionString.data()), ClientVersionString.length());
+            
+            // Official clients send the challenge again at the end,
+            // while other clients do not.
             serializer.SerializeU32(ClientChallengeResponse);
         }
 
-        uint32_t Version;
-        uint8_t Mod;
+        uint32_t ClientVersion;
+        uint8_t Modded;
         std::string_view Nickname;
         uint32_t ClientChallengeResponse;
         std::string_view Auth;
-        std::string_view ClientVersion;
+        std::string_view ClientVersionString;
     };
 }

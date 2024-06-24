@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Packet.hh"
+#include "../BitSerde.hh"
 #include <RakNet/RakPeerInterface.h>
 #include <string>
 
@@ -33,7 +34,18 @@ namespace Luna::Network {
             return m_State;
         }
 
-        void SendPacket(IPacketSerializable const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
+        bool SendPacket(PacketID id, BitSerde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
+        bool SendRPC(PacketID id, BitSerde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
+
+        template<typename T>
+        inline bool Send(T const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability) {
+            if constexpr (IsRPC<T>()) {
+                return SendRPC(GetPacketID<T>(), packet, priority, reliability);
+            }
+            else {
+                return SendPacket(GetPacketID<T>(), packet, priority, reliability);
+            }
+        }
 
     private:
         void RetryConnect();
