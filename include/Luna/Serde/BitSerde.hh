@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
+#include "Serde.hh"
 
-namespace Luna::BitSerde {
+namespace Luna::Serde {
     static inline size_t BitsToBytes(size_t value) {
         return (value + 7) >> 3;
     }
@@ -14,9 +13,9 @@ namespace Luna::BitSerde {
         return value << 3;
     }
 
-    class CSerializer {
+    class CBitSerializer : public ISerializer {
     public:
-        CSerializer(uint8_t* data, size_t capacity) :
+        CBitSerializer(uint8_t* data, size_t capacity) :
             m_Data(data), m_Capacity(capacity), m_OffsetInBits(0) {}
 
         void SerializeBits(uint8_t const* bits, size_t lengthInBits);
@@ -34,17 +33,10 @@ namespace Luna::BitSerde {
         inline void SerializeF32(float value)    { SerializeBytes(reinterpret_cast<uint8_t*>(&value), 4); }
         inline void SerializeF64(double value)   { SerializeBytes(reinterpret_cast<uint8_t*>(&value), 8); }
 
-        template<typename T>
-        inline void SerializeObject(T const& object) {
-            object.Serialize(*this);
-        }
-
-        /// Returns the offset in bytes.
         inline size_t OffsetInBytes() const {
             return BitsToBytes(m_OffsetInBits);
         }
 
-        /// Returns the offset in bits.
         inline size_t OffsetInBits() const {
             return m_OffsetInBits;
         }
@@ -55,10 +47,10 @@ namespace Luna::BitSerde {
         size_t m_OffsetInBits;
     };
 
-    class CDeserializer {
+    class CBitDeserializer : public IDeserializer {
     public:
-        CDeserializer(uint8_t const* data, size_t length) :
-            m_Data(data), m_Length(length), m_OffsetInBits(0) {}
+        CBitDeserializer(uint8_t const* data, size_t lengthInBits) :
+            m_Data(data), m_DataSizeInBits(lengthInBits), m_OffsetInBits(0) {}
 
         void DeserializeBits(uint8_t* dest, size_t lengthInBits);
         void DeserializeBytes(uint8_t* dest, size_t length);
@@ -76,32 +68,17 @@ namespace Luna::BitSerde {
         inline float DeserializeF32()    { float x;    DeserializeBytes(reinterpret_cast<uint8_t*>(&x), 4); return x; }
         inline double DeserializeF64()   { double x;   DeserializeBytes(reinterpret_cast<uint8_t*>(&x), 8); return x; }
 
-        template<typename T>
-        inline void DeserializeObject(T& object) {
-            object.Deserialize(*this);
-        }
-
-        /// Returns the offset in bytes.
         inline size_t OffsetInBytes() const {
             return BitsToBytes(m_OffsetInBits);
         }
 
-        /// Returns the offset in bits.
         inline size_t OffsetInBits() const {
             return m_OffsetInBits;
         }
 
     private:
         uint8_t const* m_Data;
-        size_t m_Length;
+        size_t m_DataSizeInBits;
         size_t m_OffsetInBits;
-    };
-
-    struct ISerializable {
-        virtual void Serialize(BitSerde::CSerializer& serializer) const = 0;
-    };
-
-    struct IDeserializable {
-        virtual void Deserialize(BitSerde::CDeserializer& deserializer) = 0;
     };
 }

@@ -12,6 +12,7 @@
 #include <Luna/Game/World.hh>
 #include <Luna/Core/Memory.hh>
 #include <Luna/Network/Client.hh>
+#include <Luna/Network/RemotePlayer.hh>
 
 #include <spdlog/spdlog.h>
 #include <dlfcn.h>
@@ -68,4 +69,7 @@ void Game::InitializeLuna() {
     CGui::Create().Initialize();
 
     client = new CClient();
+
+    CRemotePlayerComponent* remotePlayerComponent = new CRemotePlayerComponent;
+    remotePlayerComponent->Install(*client);
 }

@@ -1,23 +1,22 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
 
-#include <Luna/BitSerde.hh>
+#include <Luna/Serde/BitSerde.hh>
 #include <cstring>
-#include <exception>
 
 using namespace Luna;
-using namespace Luna::BitSerde;
+using namespace Luna::Serde;
 
-struct CNoBytesLeft : public std::exception {
+class CNoBytesLeftException : public CSerdeException {
 public:
     const char* what() const noexcept {
         return "no bytes left to serialize";
     }
 };
 
-void CSerializer::SerializeBits(uint8_t const* bits, size_t lengthInBits) {
+void CBitSerializer::SerializeBits(uint8_t const* bits, size_t lengthInBits) {
     #ifndef NDEBUG
     if (BitsToBytes(m_OffsetInBits + lengthInBits) > m_Capacity)
-        throw CNoBytesLeft();
+        throw CNoBytesLeftException();
     #endif
 
     size_t offsetMod8 = m_OffsetInBits % 8;
@@ -53,23 +52,23 @@ void CSerializer::SerializeBits(uint8_t const* bits, size_t lengthInBits) {
     }
 }
 
-void CSerializer::SerializeBytes(uint8_t const* bytes, size_t length) {
+void CBitSerializer::SerializeBytes(uint8_t const* bytes, size_t length) {
     if ((m_OffsetInBits % 8) != 0)
         return SerializeBits(bytes, length * 8);
 
     #ifndef NDEBUG
     if (BitsToBytes(m_OffsetInBits) + length > m_Capacity)
-        throw CNoBytesLeft();
+        throw CNoBytesLeftException();
     #endif
 
     memcpy(m_Data + (m_OffsetInBits >> 3), bytes, length);
     m_OffsetInBits += length * 8;
 }
 
-void CSerializer::SerializeBool(bool value) {
+void CBitSerializer::SerializeBool(bool value) {
     #ifndef NDEBUG
     if (BitsToBytes(m_OffsetInBits + 1) > m_Capacity)
-        throw CNoBytesLeft();
+        throw CNoBytesLeftException();
     #endif
 
     size_t offsetMod8 = m_OffsetInBits % 8;

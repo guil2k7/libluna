@@ -1,22 +1,22 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
 
-#include <Luna/BitSerde.hh>
+#include <Luna/Serde/BitSerde.hh>
+#include <cmath>
 #include <cstring>
-#include <exception>
 
 using namespace Luna;
-using namespace Luna::BitSerde;
+using namespace Luna::Serde;
 
-struct CNoBytesLeft : public std::exception {
+class CNoBitsLeftException : public CSerdeException {
 public:
     const char* what() const noexcept {
-        return "no bytes left to deserialize/skip";
+        return "no bits left to deserialize/skip";
     }
 };
 
-void CDeserializer::DeserializeBits(uint8_t* dest, size_t lengthInBits) {
-    if (BitsToBytes(m_OffsetInBits + lengthInBits) > m_Length)
-        throw CNoBytesLeft();
+void CBitDeserializer::DeserializeBits(uint8_t* dest, size_t lengthInBits) {
+    if (m_OffsetInBits + lengthInBits > m_DataSizeInBits)
+        throw CNoBitsLeftException();
 
     size_t offsetMod8 = m_OffsetInBits % 8;
     size_t bitsToRead = lengthInBits;
@@ -43,33 +43,32 @@ void CDeserializer::DeserializeBits(uint8_t* dest, size_t lengthInBits) {
     }
 }
 
-void CDeserializer::DeserializeBytes(uint8_t* dest, size_t length) {
+void CBitDeserializer::DeserializeBytes(uint8_t* dest, size_t length) {
     if ((m_OffsetInBits % 8) != 0)
         return DeserializeBits(dest, length * 8);
 
     #ifndef NDEBUG
-    if (BitsToBytes(m_OffsetInBits) + length > m_Length)
-        throw CNoBytesLeft();
+    if (m_OffsetInBits + length * 8 > m_DataSizeInBits)
+        throw CNoBitsLeftException();
     #endif
 
     memcpy(dest, m_Data + (m_OffsetInBits >> 3), length);
     m_OffsetInBits += length * 8;
 }
 
-void CDeserializer::SkipBytes(size_t count) {
-    if (BitsToBytes(m_OffsetInBits) + count > m_Length)
-        throw CNoBytesLeft();
+void CBitDeserializer::SkipBytes(size_t count) {
+    if (m_OffsetInBits + count * 8 > m_DataSizeInBits)
+        throw CNoBitsLeftException();
 
     m_OffsetInBits += count * 8;
 }
 
-bool CDeserializer::DeserializeBool() {
-    if (BitsToBytes(m_OffsetInBits + 1) > m_Length)
-        throw CNoBytesLeft();
+bool CBitDeserializer::DeserializeBool() {
+    if (m_OffsetInBits + 1 > m_DataSizeInBits)
+        throw CNoBitsLeftException();
 
     bool value = static_cast<bool>(m_Data[m_OffsetInBits >> 3] & (0x80 >> (m_OffsetInBits % 8)));
     m_OffsetInBits += 1;
 
     return value;
 }
-

@@ -3,16 +3,16 @@
 #pragma once
 
 #include "../Packet.hh"
-#include "../../BitSerde.hh"
+#include "../../Serde/Serde.hh"
 #include "RakNet/NetworkTypes.h"
 #include <cstdint>
 #include <string_view>
 
 namespace Luna::Network::Code {
-    struct CConnectionRequestAccepted final : public BitSerde::IDeserializable {
+    struct CConnectionRequestAccepted final : public Serde::IDeserializable {
         LUNA_DEFINE_PACKET(false, 34)
 
-        void Deserialize(BitSerde::CDeserializer& deserializer) override {
+        void Deserialize(Serde::IDeserializer& deserializer) override {
             deserializer.SkipBytes(6);
             PlayerIndex = deserializer.DeserializeU16();
             SampToken = deserializer.DeserializeU32();
@@ -22,10 +22,10 @@ namespace Luna::Network::Code {
         uint32_t SampToken;
     };
 
-    struct CClientLogin final : public BitSerde::ISerializable {
+    struct CClientLogin final : public Serde::ISerializable {
         LUNA_DEFINE_PACKET(true, 25)
 
-        void Serialize(BitSerde::CSerializer& serializer) const override {
+        void Serialize(Serde::ISerializer& serializer) const override {
             serializer.SerializeU32(ClientVersion);
             serializer.SerializeU8(Modded);
             serializer.SerializeU8(Nickname.length());

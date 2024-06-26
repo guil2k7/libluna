@@ -2,8 +2,8 @@ set(LUNA_LINK_LIBRARIES spdlog::spdlog imgui raknet)
 set(LUNA_SOURCE_FILES Main.cc)
 
 add_subdirectory(Core)
+add_subdirectory(Serde)
 add_subdirectory(Game)
-add_subdirectory(BitSerde)
 add_subdirectory(Network)
 
 add_library(luna SHARED ${LUNA_SOURCE_FILES})
