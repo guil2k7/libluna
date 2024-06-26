@@ -1,16 +1,14 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
 
-#include <jni.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/android_sink.h>
-
 #include <Luna/Game/Gui.hh>
 #include <Luna/Game/imgui_impl_rw.hh>
 #include <Luna/Game/Luna.hh>
-#include <Luna/Game/PlayerPed.hh>
-#include <Luna/Game/World.hh>
-#include <Luna/Game/Task/TaskSimplePlayerOnFoot.hh>
 #include <Luna/Network/Client.hh>
+#include <Luna/Network/RemotePlayer.hh>
+
+#include <jni.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/android_sink.h>
 
 using namespace Luna;
 using namespace Luna::Game;
@@ -35,18 +33,6 @@ public:
         if (ImGui::Button(">>"))
             id += 1;
 
-        if (ImGui::Button("Create player")) {
-            CPlayerPed::SetupPlayerPed(id + 2);
-
-            CPlayerPed* mainPlayer = CWorld::Players()[0].PlayerPed;
-            CPlayerPed* playerCreated = CWorld::Players()[id + 2].PlayerPed;
-
-            playerCreated->TaskManager()->SetTask(
-                CTaskSimplePlayerOnFoot::Create(), 4, false);
-
-            playerCreated->Matrix() = mainPlayer->Matrix();
-        }
-
         ImGui::InputText("IP or Host", host, sizeof host);
 
         if (ImGui::Button("Connect")) {
@@ -65,22 +51,14 @@ public:
 
 private:
     int id = 0;
-    CVector pos;
     char host[128];
 };
 
-extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    auto logger = spdlog::android_logger_mt("luna", "luna");
-    logger->set_level(spdlog::level::debug);
+extern "C" __attribute__((visibility("default"))) void LunaInitialize(void* libGTASAHandle) {
+    client = new CClient();
 
-    spdlog::set_default_logger(logger);
+    CRemotePlayerComponent* remotePlayerComponent = new CRemotePlayerComponent;
+    remotePlayerComponent->Install(*client);
 
-    spdlog::info(
-        "Luna, version: {}.{}.{}",
-        LUNA_VERSION_MAJOR, LUNA_VERSION_MINOR, LUNA_VERSION_PATCH);
-
-    Game::InitializeLuna();
-    CGui::Instance().Subscribe(new DebugMenu);
-
-    return JNI_VERSION_1_4;
+    InitializeGame(libGTASAHandle);
 }

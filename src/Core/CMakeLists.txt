@@ -1,7 +1,8 @@
-set(LUNA_SOURCE_FILES ${LUNA_SOURCE_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Memory.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/MemoryExec.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThumbHook.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/ArmHook.cc
-    PARENT_SCOPE
+set(LUNA_SOURCE_FILES
+    Memory.cc
+    MemoryExec.cc
+    ThumbHook.cc
+    ArmHook.cc
 )
+
+add_library(LunaCore STATIC ${LUNA_SOURCE_FILES})

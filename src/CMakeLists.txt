@@ -1,11 +1,13 @@
-set(LUNA_LINK_LIBRARIES spdlog::spdlog imgui raknet)
-set(LUNA_SOURCE_FILES Main.cc)
+include_directories(${LUNA_INCLUDE_DIRS})
+link_libraries(spdlog::spdlog)
+
+set(LUNA_SOURCE_FILES
+    Main.cc
+)
 
 add_subdirectory(Core)
 add_subdirectory(Serde)
 add_subdirectory(Game)
 add_subdirectory(Network)
-
-add_library(luna SHARED ${LUNA_SOURCE_FILES})
-target_include_directories(luna PRIVATE ${LUNA_INCLUDE_DIRS})
-target_link_libraries(luna PRIVATE ${LUNA_LINK_LIBRARIES})
+add_subdirectory(Loader)
+add_subdirectory(Luna)

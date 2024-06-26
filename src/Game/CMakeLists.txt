@@ -1,13 +1,15 @@
-set(LUNA_SOURCE_FILES ${LUNA_SOURCE_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Game.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Gui.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Hud.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/imgui_impl_rw.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Luna.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Pad.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/PlayerPed.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/RW.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/OSEvent.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/World.cc
-    PARENT_SCOPE
+set(LUNA_SOURCE_FILES
+    Game.cc
+    Gui.cc
+    Hud.cc
+    imgui_impl_rw.cc
+    Luna.cc
+    Pad.cc
+    PlayerPed.cc
+    RW.cc
+    OSEvent.cc
+    World.cc
 )
+
+add_library(LunaGame STATIC ${LUNA_SOURCE_FILES})
+target_link_libraries(LunaGame PUBLIC imgui LunaCore LunaNetwork)
