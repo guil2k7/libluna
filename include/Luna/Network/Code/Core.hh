@@ -9,43 +9,29 @@
 #include <string_view>
 
 namespace Luna::Network::Code {
-    struct CConnectionRequestAccepted final : public Serde::IDeserializable {
-        LUNA_DEFINE_PACKET(false, 34)
 
-        void Deserialize(Serde::IDeserializer& deserializer) override {
-            deserializer.SkipBytes(6);
-            PlayerIndex = deserializer.DeserializeU16();
-            SampToken = deserializer.DeserializeU32();
-        }
+struct CConnectionRequestAccepted final : public Serde::IDeserializable {
+    LUNA_DEFINE_PACKET(false, 34)
 
-        RakNet::PlayerIndex PlayerIndex;
-        uint32_t SampToken;
-    };
+    void Deserialize(Serde::IDeserializer& deserializer) override;
 
-    struct CClientLogin final : public Serde::ISerializable {
-        LUNA_DEFINE_PACKET(true, 25)
+    RakNet::PlayerIndex PlayerIndex;
+    uint32_t SampToken;
+};
 
-        void Serialize(Serde::ISerializer& serializer) const override {
-            serializer.SerializeU32(ClientVersion);
-            serializer.SerializeU8(Modded);
-            serializer.SerializeU8(Nickname.length());
-            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(Nickname.data()), Nickname.length());
-            serializer.SerializeU32(ClientChallengeResponse);
-            serializer.SerializeU8(Auth.length());
-            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(Auth.data()), Auth.length());
-            serializer.SerializeU8(ClientVersionString.length());
-            serializer.SerializeBytes(reinterpret_cast<uint8_t const*>(ClientVersionString.data()), ClientVersionString.length());
-            
-            // Official clients send the challenge again at the end,
-            // while other clients do not.
-            serializer.SerializeU32(ClientChallengeResponse);
-        }
+struct CClientLogin final : public Serde::ISerializable {
+    LUNA_DEFINE_PACKET(true, 25)
 
-        uint32_t ClientVersion;
-        uint8_t Modded;
-        std::string_view Nickname;
-        uint32_t ClientChallengeResponse;
-        std::string_view Auth;
-        std::string_view ClientVersionString;
-    };
-}
+    void Serialize(Serde::ISerializer& serializer) const override;
+
+    uint32_t ClientVersion;
+    uint8_t Modded;
+    std::string_view Nickname;
+    uint32_t ClientChallengeResponse;
+    std::string_view Auth;
+    std::string_view ClientVersionString;
+};
+
+} // namespace Luna::Network::Code
+
+#include "Core.inl"

@@ -7,31 +7,33 @@
 #include <cstdint>
 
 namespace Luna::Game {
-    class CMatrix {
-    public:
-        void ResetOrientation() {
-            Right.Set(1.0F, 0.0F, 0.0F);
-            Forward.Set(0.0F, 1.0F, 0.0F);
-            Up.Set(0.0F, 0.0F, 1.0F);
-        }
 
-        void SetUnity() {
-            ResetOrientation();
-            Position.Reset();
-        }
+class CMatrix {
+public:
+    inline void ResetOrientation() {
+        Right.Set(1.0f, 0.0f, 0.0f);
+        Forward.Set(0.0f, 1.0f, 0.0f);
+        Up.Set(0.0f, 0.0f, 1.0f);
+    }
 
-        CVector Right;
-        uint32_t Flags;
-        CVector Forward;
-        PADDING(4);
-        CVector Up;
-        PADDING(4);
-        CVector Position;
-    };
+    inline void SetUnity() {
+        ResetOrientation();
+        Position.Reset();
+    }
 
-    // VALIDATE_OFFSET(CMatrix, right, 0);
-    VALIDATE_OFFSET(CMatrix, Forward, 0x10);
-    // VALIDATE_OFFSET(CMatrix, pos, 0x30);
+    CVector Right;
+    uint32_t Flags;
+    CVector Forward;
+    PADDING(4);
+    CVector Up;
+    PADDING(4);
+    CVector Position;
+};
 
-    VALIDATE_SIZE(CMatrix, 60);
-}
+VALIDATE_SIZE(CMatrix, 60);
+
+// VALIDATE_OFFSET(CMatrix, right, 0);
+VALIDATE_OFFSET(CMatrix, Forward, 0x10);
+// VALIDATE_OFFSET(CMatrix, pos, 0x30);
+
+} // namespce Luna::Game

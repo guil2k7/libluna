@@ -1,4 +1,7 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
+// Distributed under the BSD 3-Clause License.
+// See LICENSE.txt in the root directory of this project
+// or at https://opensource.org/license/bsd-3-clause.
 
 #include <Luna/Game/Luna.hh>
 #include <Luna/Game/Common.hh>
@@ -21,11 +24,7 @@ using namespace Luna::Game;
 
 uint8_t* Game::GameAddress = nullptr;
 
-void Game::InitializeGame(void* libGTASAHandle) {
-    GameAddress
-        = reinterpret_cast<uint8_t*>(dlsym(libGTASAHandle, "RwEngineInstance"))
-        - 0x6CCD38;
-
+void Game::InitializeGame() {
     CGame::InitializeLuna();
     CHud::InitializeLuna();
     CPad::InitializeLuna();
@@ -34,5 +33,5 @@ void Game::InitializeGame(void* libGTASAHandle) {
     OSEvents::InitializeLuna();
     CWorld::InitializeLuna();
 
-    CGui::Create().Initialize();
+    CGui::Initialize();
 }

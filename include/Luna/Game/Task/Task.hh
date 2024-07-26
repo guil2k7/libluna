@@ -6,13 +6,15 @@
 #include <cstddef>
 
 namespace Luna::Game {
-    class CTask {
-    public:
-        CTask() = delete;
-        ~CTask() = delete;
 
-        inline static void* operator new(size_t size) {
-            return CallFunction<void*, size_t>(GameAddress + 0x4E6A71, size);
-        }
-    };
-}
+class CTask {
+public:
+    CTask() = delete;
+    ~CTask() = delete;
+
+    inline static void* operator new(size_t size) {
+        return CallFunction<void*, size_t>(GameAddress + 0x4E6A71, size);
+    }
+};
+
+} // namespace Luna::Game

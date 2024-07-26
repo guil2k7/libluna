@@ -3,5 +3,7 @@
 #pragma once
 
 namespace Luna::Game {
-    void InitializeGame(void* libGTASAHandle);
-}
+
+void InitializeGame();
+
+} // namespce Luna::Game

@@ -8,89 +8,94 @@
 #include <string>
 
 namespace Luna::Network {
-    class CClient;
 
-    enum eClientState {
-        CLIENT_STATE_UNDEFINED,
-        CLIENT_STATE_DISCONNECTED,
-        CLIENT_STATE_CONNECTED,
-        CLIENT_STATE_CONNECTING,
-    };
+class CClient;
 
-    struct CConnectionParams {
-        std::string Nickname;
-        std::string Host;
-        uint16_t Port;
-    };
+enum eClientState {
+    CLIENT_STATE_UNDEFINED,
+    CLIENT_STATE_DISCONNECTED,
+    CLIENT_STATE_CONNECTED,
+    CLIENT_STATE_CONNECTING,
+};
 
-    struct IPacketEventHandler {
-        /// Returns true to prevent others handlers from receiving a notification for this packet.
-        virtual bool OnReceivePacket(CClient& client, PacketID id, uint8_t const* data, size_t bitSize) = 0;
-    };
+struct CConnectionParams {
+    std::string Nickname;
+    std::string Host;
+    uint16_t Port;
+};
 
-    typedef void (*RpcEventHandlerCallback)(void* userData, CClient& client, uint8_t const* data, size_t bitSize);
+struct IPacketEventHandler {
+    /// Returns true to prevent others handlers from receiving a notification for this packet.
+    virtual bool OnReceivePacket(CClient& client, PacketID id, uint8_t const* data, size_t bitSize) = 0;
+};
 
-    struct CRpcEventHandler {
-        constexpr CRpcEventHandler() : Callback(nullptr), UserData(nullptr) {}
+typedef void (*RpcEventHandlerCallback)(void* userData, CClient& client, uint8_t const* data, size_t bitSize);
 
-        CRpcEventHandler(void* userData, RpcEventHandlerCallback callback) :
-            UserData(userData), Callback(callback) {}
+struct CRpcEventHandler {
+    constexpr CRpcEventHandler() : Callback(nullptr), UserData(nullptr) {}
 
-        void* UserData;
-        RpcEventHandlerCallback Callback;
-    };
+    CRpcEventHandler(void* userData, RpcEventHandlerCallback callback) :
+        UserData(userData), Callback(callback) {}
 
-    class CClient {
-    public:
-        CClient();
-        ~CClient();
+    void* UserData;
+    RpcEventHandlerCallback Callback;
+};
 
-        bool SetConnectionParams(CConnectionParams const& params);
-        void Connect();
-        void Process();
+class CClient {
+public:
+    CClient();
+    ~CClient();
 
-        bool SendPacket(PacketID id, Serde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
-        bool SendRPC(PacketID id, Serde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
+    bool SetConnectionParams(CConnectionParams const& params);
+    void Connect();
+    void Process();
 
-        template<typename T>
-        inline bool Send(T const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability) {
-            if constexpr (IsRPC<T>()) {
-                return SendRPC(GetPacketID<T>(), packet, priority, reliability);
-            }
-            else {
-                return SendPacket(GetPacketID<T>(), packet, priority, reliability);
-            }
-        }
+    bool SendPacket(PacketID id, Serde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
+    bool SendRPC(PacketID id, Serde::ISerializable const& data, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
 
-        bool RegisterHandlerForRPC(RakNet::RPCID id, CRpcEventHandler handler);
+    template<typename T>
+    bool Send(T const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability);
 
-        inline void RegisterPacketHandler(IPacketEventHandler* handler) {
-            m_PacketHandlers.push_back(handler);
-        }
+    bool RegisterHandlerForRPC(RakNet::RPCID id, CRpcEventHandler handler);
 
-        inline eClientState State() const {
-            return m_State;
-        }
+    inline void RegisterPacketHandler(IPacketEventHandler* handler) {
+        m_PacketHandlers.push_back(handler);
+    }
 
-        inline uint16_t OurID() const {
-            return m_OurID;
-        }
+    inline eClientState State() const {
+        return m_State;
+    }
 
-    private:
-        void RetryConnect();
-        void ProcessPacket(RakNet::Packet const* packet);
-        void ProcessConnectionRequestAccepted(RakNet::Packet const* packet);
-        void ProcessRPC(RakNet::Packet const* packet);
+    inline uint16_t OurID() const {
+        return m_OurID;
+    }
 
-        RakNet::RakPeerInterface* m_RakPeer;
-        RakNet::PlayerID m_ServerAddr;
-        eClientState m_State;
-        CConnectionParams m_ConnectionParams;
-        uint16_t m_OurID;
+private:
+    void RetryConnect();
+    void ProcessPacket(RakNet::Packet const* packet);
+    void ProcessConnectionRequestAccepted(RakNet::Packet const* packet);
+    void ProcessRPC(RakNet::Packet const* packet);
 
-        CRpcEventHandler* m_RpcHandlers;
-        std::vector<IPacketEventHandler*> m_PacketHandlers;
-    };
+    RakNet::RakPeerInterface* m_RakPeer;
+    RakNet::PlayerID m_ServerAddr;
+    eClientState m_State;
+    CConnectionParams m_ConnectionParams;
+    uint16_t m_OurID;
 
-    extern CClient* client;
+    CRpcEventHandler* m_RpcHandlers;
+    std::vector<IPacketEventHandler*> m_PacketHandlers;
+};
+
+template<typename T>
+inline bool CClient::Send(T const& packet, RakNet::PacketPriority priority, RakNet::PacketReliability reliability) {
+    if constexpr (IsRPC<T>()) {
+        return SendRPC(GetPacketID<T>(), packet, priority, reliability);
+    }
+    else {
+        return SendPacket(GetPacketID<T>(), packet, priority, reliability);
+    }
 }
+
+extern CClient* client;
+
+} // namespace Luna::Network

@@ -6,13 +6,15 @@
 #include "../Common.hh"
 
 namespace Luna::Game {
-    class CTaskManager {
-    public:
-        CTaskManager() = delete;
-        ~CTaskManager() = delete;
 
-        inline void SetTask(CTask* task, int index, bool unk) {
-            CallMethod<void, CTask*, int, bool>(GameAddress + 0x54397B, this, task, index, unk);
-        }
-    };
-}
+class CTaskManager {
+public:
+    CTaskManager() = delete;
+    ~CTaskManager() = delete;
+
+    inline void SetTask(CTask* task, int index, bool unk) {
+        CallMethod<void, CTask*, int, bool>(GameAddress + 0x54397B, this, task, index, unk);
+    }
+};
+
+} // namespace Luna::Game

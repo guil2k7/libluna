@@ -3,8 +3,10 @@
 #pragma once
 
 namespace Luna::Game {
-    class CGame {
-    public:
-        static void InitializeLuna();
-    };
-}
+
+class CGame {
+public:
+    static void InitializeLuna();
+};
+
+} // namespce Luna::Game

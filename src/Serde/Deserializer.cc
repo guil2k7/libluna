@@ -1,4 +1,7 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
+// Distributed under the BSD 3-Clause License.
+// See LICENSE.txt in the root directory of this project
+// or at https://opensource.org/license/bsd-3-clause.
 
 #include <Luna/Serde/Serde.hh>
 #include <cmath>
@@ -23,18 +26,18 @@ void IDeserializer::DeserializeNormQuat(float& w, float& x, float& y, float& z) 
         cz = 0;
     }
 
-    x = cx / 65535.0F;
-    y = cy / 65535.0F;
-    z = cz / 65535.0F;
+    x = cx / 65535.0f;
+    y = cy / 65535.0f;
+    z = cz / 65535.0f;
 
     if (cxNeg) x = -x;
     if (cyNeg) y = -y;
     if (czNeg) z = -z;
 
-    float difference = 1.0F - x * x - y * y - z * z;
+    float difference = 1.0f - x * x - y * y - z * z;
 
-    if (difference < 0.0F)
-        difference = 0.0F;
+    if (difference < 0.0f)
+        difference = 0.0f;
 
     w = sqrt(difference);
 
@@ -44,10 +47,10 @@ void IDeserializer::DeserializeNormQuat(float& w, float& x, float& y, float& z) 
 void IDeserializer::DeserializeCompressedVec(float& x, float& y, float& z) {
     float magnitude = DeserializeF32();
 
-    if (magnitude == 0.0F) {
-        x = 0.0F;
-        y = 0.0F;
-        z = 0.0F;
+    if (magnitude == 0.0f) {
+        x = 0.0f;
+        y = 0.0f;
+        z = 0.0f;
 
         return;
     }

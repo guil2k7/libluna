@@ -8,45 +8,69 @@
 #include <cstdint>
 
 namespace Luna::Game {
-    enum ePedType {
-        PED_TYPE_PLAYER1,
-        PED_TYPE_PLAYER2,
-        PED_TYPE_PLAYER_NETWORK,
-    };
+    
+enum ePedType {
+    PED_TYPE_PLAYER1,
+    PED_TYPE_PLAYER2,
+    PED_TYPE_PLAYER_NETWORK,
+};
 
-    class CPed {
-    protected:
-        void** vtable;
+class CPed {
+protected:
+    void** vtable;
 
-    private:
-        PADDING(16); // CSimpleTransform placement
-        CMatrix* m_Matrix; // CMatrixLink
-        PADDING(1064);
-        uint8_t* m_Intelligence;
-        PADDING(344);
+private:
+    // Offset: 4.
+    PADDING(16); // CSimpleTransform placement.
 
-    public:
-        CPed() = delete;
-        ~CPed() = delete;
+    // Offset: 20. CMatrixLink
+    CMatrix* m_Matrix;
+    PADDING(1064);
 
-        ePedType PedType;
+    // Offset: 1088.
+    uint8_t* m_Intelligence;
+    PADDING(256);
 
-        inline CTaskManager* TaskManager() {
-            return reinterpret_cast<CTaskManager*>(m_Intelligence + 4);
-        }
+    // Offset: 1348.
+    float m_Health;
+    float m_MaxHealth;
+    PADDING(80);
 
-        inline CMatrix& Matrix() {
-            return **reinterpret_cast<CMatrix**>(
-                reinterpret_cast<uint8_t*>(this) + 0x14);
-        }
+public:
+    CPed() = delete;
+    ~CPed() = delete;
 
-    private:
-        PADDING(516);
+    // Offset: 1436.
+    ePedType PedType;
 
-        static void _Assertions() {
-            VALIDATE_OFFSET(CPed, PedType, 0x59C);
-        }
-    };
+    inline bool IsPlayer() const {
+        return PedType <= PED_TYPE_PLAYER_NETWORK;
+    }
 
-    VALIDATE_SIZE(CPed, 1956);
-}
+    inline CTaskManager* TaskManager() {
+        return reinterpret_cast<CTaskManager*>(m_Intelligence + 4);
+    }
+
+    inline CMatrix& Matrix() {
+        return **reinterpret_cast<CMatrix**>(
+            reinterpret_cast<uint8_t*>(this) + 0x14);
+    }
+
+    void SetHealth(float value);
+
+    inline float Health() const {
+        return m_Health;
+    }
+
+private:
+    PADDING(516);
+
+    static void _Assertions() {
+        VALIDATE_OFFSET(CPed, PedType, 1436);
+        VALIDATE_OFFSET(CPed, m_MaxHealth, 1352);
+    }
+};
+
+VALIDATE_SIZE(CPed, 1956);
+
+} // namespce Luna::Game

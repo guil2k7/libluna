@@ -6,34 +6,30 @@
 #include <cassert>
 
 namespace Luna::Game {
-    /* <NOTSA> */
 
-    class IGuiWidget {
-    public:
-        virtual void Render() = 0;
-    };
+class IGuiWidget {
+public:
+    virtual void Render() = 0;
+};
 
-    class CGui {
-    public:
-        static CGui& Create();
+class CGui {
+public:
+    static inline CGui& Instance() {
+        assert(m_Instance != nullptr);
+        return *m_Instance;
+    }
 
-        static inline CGui& Instance() {
-            assert(s_Instance != nullptr);
-            return *s_Instance;
-        }
+    static void Initialize();
+    void Render();
 
-        void Initialize();
-        void Render();
+    inline void Subscribe(IGuiWidget* handler) {
+        m_Subscribers.push_back(handler);
+    }
 
-        inline void Subscribe(IGuiWidget* handler) {
-            m_Subscribers.push_back(handler);
-        }
+private:
+    static CGui* m_Instance;
 
-    private:
-        static CGui* s_Instance;
+    std::vector<IGuiWidget*> m_Subscribers;
+};
 
-        std::vector<IGuiWidget*> m_Subscribers;
-    };
-
-    /* </NOTSA> */
-}
+} // namespce Luna::Game

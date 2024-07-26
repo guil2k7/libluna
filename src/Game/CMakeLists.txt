@@ -5,6 +5,7 @@ set(LUNA_SOURCE_FILES
     imgui_impl_rw.cc
     Luna.cc
     Pad.cc
+    Ped.cc
     PlayerPed.cc
     RW.cc
     OSEvent.cc

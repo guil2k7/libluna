@@ -10,5 +10,3 @@ target_link_libraries(Luna PRIVATE
     LunaNetwork
     LunaSerde
 )
-
-set_target_properties(Luna PROPERTIES PREFIX "")

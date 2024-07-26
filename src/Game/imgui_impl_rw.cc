@@ -132,7 +132,7 @@ void ImGui_ImplRW_RenderDrawData(ImDrawData* drawData) {
     RwCamera* camera = RWSRCGLOBAL(curCamera);
     RwIm2DVertex* vtxDst = bd->VertexBuf;
 
-    float recipZ = 1.0F / camera->nearPlane;
+    float recipZ = 1.0f / camera->nearPlane;
     float nearZ = RWSRCGLOBAL(dOpenDevice).zBufferNear;
 
     for (int n = 0; n < drawData->CmdListsCount; ++n) {

@@ -6,32 +6,34 @@
 #include "Pad.hh"
 
 namespace Luna::Game {
-    class CPlayerPed : public CPed {
-    public:
-        static void InitializeLuna();
 
-        static CPlayerPed* Create(int id, bool groupCreated);
-        static void Destroy(CPlayerPed* instance);
-        static void SetupPlayerPed(int id);
+class CPlayerPed : public CPed {
+public:
+    static void InitializeLuna();
 
-        void ProcessControl();
+    static CPlayerPed* Create(int id, bool groupCreated);
+    static void Destroy(CPlayerPed* instance);
+    static void SetupPlayerPed(int id);
 
-        inline int ID() const {
-            return m_ID;
-        }
+    void ProcessControl();
 
-        inline CPad* Pad() {
-            return &m_Pad;
-        }
+    inline int ID() const {
+        return m_ID;
+    }
 
-        void _Initialize(int id);
+    inline CPad* Pad() {
+        return &m_Pad;
+    }
 
-    private:
-        PADDING(8);
+    void _Initialize(int id);
 
-        int m_ID;
-        CPad m_Pad;
-    };
+private:
+    PADDING(8);
 
-    static_assert(sizeof (CPlayerPed) >= 1964 && sizeof (CPlayerPed) <= 1996);
-}
+    int m_ID;
+    CPad m_Pad;
+};
+
+static_assert(sizeof (CPlayerPed) >= 1964 && sizeof (CPlayerPed) <= 1996);
+
+} // namespce Luna::Game

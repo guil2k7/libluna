@@ -3,18 +3,20 @@
 #pragma once
 
 namespace Luna::Game {
-    enum eTouchAction : int {
-        TOUCH_ACTION_RELEASE = 1,
-        TOUCH_ACTION_PRESS,
-        TOUCH_ACTION_MOVE,
-    };
 
-    class OSEvents {
-    public:
-        static void InitializeLuna();
+enum eTouchAction : int {
+    TOUCH_ACTION_RELEASE = 1,
+    TOUCH_ACTION_PRESS,
+    TOUCH_ACTION_MOVE,
+};
 
-        static void ShowKeyboard();
-        static void HideKeyboard();
-        static bool IsKeyboardShown();
-    };
-}
+class OSEvents {
+public:
+    static void InitializeLuna();
+
+    static void ShowKeyboard();
+    static void HideKeyboard();
+    static bool IsKeyboardShown();
+};
+
+} // namespce Luna::Game

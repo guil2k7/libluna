@@ -6,20 +6,24 @@
 #include "../Common.hh"
 
 namespace Luna::Game {
-    class CTaskSimplePlayerOnFoot : public CTask {
-    public:
-        static inline CTaskSimplePlayerOnFoot* Create() {
-            auto self = CTask::operator new(sizeof (CTaskSimplePlayerOnFoot));
 
-            // Call the constructor.
-            CallMethod<void*>(GameAddress + 0x547551, self);
+class CTaskSimplePlayerOnFoot : public CTask {
+public:
+    static CTaskSimplePlayerOnFoot* Create();
 
-            return reinterpret_cast<CTaskSimplePlayerOnFoot*>(self);
-        }
+private:
+    PADDING(0x34);
+};
 
-    private:
-        PADDING(0x34);
-    };
+VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x34);
 
-    VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x34);
+inline CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Create() {
+    auto self = CTask::operator new(sizeof (CTaskSimplePlayerOnFoot));
+
+    // Constructor.
+    CallMethod<void*>(GameAddress + 0x547551, self);
+
+    return reinterpret_cast<CTaskSimplePlayerOnFoot*>(self);
 }
+
+} // namespace Luna::Game

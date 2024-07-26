@@ -3346,7 +3346,7 @@ void RakNet::ProcessNetworkPacket( const unsigned int binaryAddress, const unsig
 	remoteSystem = rakPeer->GetRemoteSystemFromPlayerID( playerId, true, true );
 	if ( remoteSystem )
 	{
-		if (remoteSystem->connectMode==RakPeer::RemoteSystemStruct::SET_ENCRYPTION_ON_MULTIPLE_16_BYTE_PACKET)
+		if (remoteSystem->connectMode == RakPeer::RemoteSystemStruct::SET_ENCRYPTION_ON_MULTIPLE_16_BYTE_PACKET)
 		{
 			bool v44 = (length & 0x80000007) == 0;
 

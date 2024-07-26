@@ -1,4 +1,7 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
+// Distributed under the BSD 3-Clause License.
+// See LICENSE.txt in the root directory of this project
+// or at https://opensource.org/license/bsd-3-clause.
 
 #include <Luna/Network/Client.hh>
 #include <Luna/Network/Code/Core.hh>
@@ -132,9 +135,7 @@ void CClient::RetryConnect() {
 }
 
 void CClient::ProcessPacket(RakNet::Packet const* packet) {
-    bool isRPC = packet->data[0];
-
-    if (isRPC) {
+    if (packet->data[0] == RakNet::ID_RPC) {
         ProcessRPC(packet);
         return;
     }
@@ -198,14 +199,21 @@ void CClient::ProcessRPC(RakNet::Packet const* packet) {
     bitStream.Read<RakNet::RPCID>(rpcID);
     bitStream.ReadCompressed<uint32_t>(dataSizeInBits);
 
+    #if 0
+    if (dataSizeInBits > 8192) {
+        spdlog::info("RPC ({}) data size is very large: {} bits.", rpcID, dataSizeInBits);
+        return;
+    }
+    #endif
+
     if (bitStream.GetReadOffset() % 8 == 0) {
         data = packet->data + BitsToBytes(bitStream.GetReadOffset());
     }
     else {
         // We have to copy into a new data chunk because
         // the user data is not byte aligned.
-        data = reinterpret_cast<uint8_t*>( alloca(BitsToBytes(dataSizeInBits)) );
-        bitStream.ReadBits(data, dataSizeInBits);
+        data = reinterpret_cast<uint8_t*>(alloca(BitsToBytes(dataSizeInBits)));
+        bitStream.ReadBits(data, dataSizeInBits, false);
     }
 
     if (m_RpcHandlers[rpcID].Callback != nullptr) {
@@ -214,7 +222,7 @@ void CClient::ProcessRPC(RakNet::Packet const* packet) {
                 m_RpcHandlers[rpcID].UserData, *this, data, dataSizeInBits);
         }
         catch (std::exception& exception) {
-            spdlog::info("An exception occurred while processing a RPC (ID: {}): {}", rpcID, exception.what());
+            spdlog::info("An exception occurred while processing a RPC ({}): {}", rpcID, exception.what());
         }
     }
     else {

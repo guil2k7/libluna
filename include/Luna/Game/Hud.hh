@@ -3,13 +3,15 @@
 #pragma once
 
 namespace Luna::Game {
-    class CHud {
-    public:
-        static void InitializeLuna();
 
-        CHud() = delete;
-        ~CHud() = delete;
+class CHud {
+public:
+    static void InitializeLuna();
 
-        void DrawAfterFade();
-    };
-}
+    CHud() = delete;
+    ~CHud() = delete;
+
+    void DrawAfterFade();
+};
+
+} // namespce Luna::Game

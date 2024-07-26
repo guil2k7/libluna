@@ -1,4 +1,7 @@
 // Copyright 2024 Maicol Castro (maicolcastro.abc@gmail.com).
+// Distributed under the BSD 3-Clause License.
+// See LICENSE.txt in the root directory of this project
+// or at https://opensource.org/license/bsd-3-clause.
 
 #include <Luna/Network/RemotePlayer.hh>
 #include <Luna/Network/Code/Player.hh>
@@ -7,7 +10,6 @@
 #include <Luna/Game/Pad.hh>
 #include <Luna/Game/World.hh>
 #include <Luna/Game/Task/TaskSimplePlayerOnFoot.hh>
-#include <RakNet/BitStream.h>
 
 using namespace Luna;
 using namespace Luna::Network;
@@ -58,6 +60,10 @@ void CRemotePlayerComponent::ProcessServerJoin(CClient& client, uint8_t const* r
 
     remotePlayer->Matrix() = mainPlayer->Matrix();
 
+    Code::CRequestClass requestClass;
+    requestClass.ID = 0;
+
+    client.Send(requestClass, RakNet::HIGH_PRIORITY, RakNet::RELIABLE_ORDERED);
     client.Send(Code::CRequestSpawn(), RakNet::HIGH_PRIORITY, RakNet::RELIABLE_ORDERED);
     client.Send(Code::CSendSpawn(), RakNet::HIGH_PRIORITY, RakNet::RELIABLE_ORDERED);
 }

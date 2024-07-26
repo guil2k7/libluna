@@ -1,5 +1,6 @@
 set(LUNA_SOURCE_FILES
     Client.cc
+    LocalPlayer.cc
     RemotePlayer.cc
 )
 

@@ -25,15 +25,17 @@ static_assert(offsetof (a, b) == c, "offset of `"#a"` != " #c);
 uint8_t _PADDING_1(_padding, __LINE__)[size]
 
 namespace Luna::Game {
-    extern uint8_t* GameAddress;
 
-    template<typename R, typename... Args>
-    inline R CallFunction(void* address, Args... args) {
-        return reinterpret_cast<R (LUNA_STDCALL *)(Args...)>(address)(args...);
-    }
+extern uint8_t* GameAddress;
 
-    template<typename R, typename... Args>
-    inline R CallMethod(void* address, void* self, Args... args) {
-        return reinterpret_cast<R (LUNA_THISCALL *)(void*, Args...)>(address)(self, args...);
-    }
+template<typename R, typename... Args>
+inline R CallFunction(void* address, Args... args) {
+    return reinterpret_cast<R (LUNA_STDCALL *)(Args...)>(address)(args...);
 }
+
+template<typename R, typename... Args>
+inline R CallMethod(void* address, void* self, Args... args) {
+    return reinterpret_cast<R (LUNA_THISCALL *)(void*, Args...)>(address)(self, args...);
+}
+
+} // namespce Luna::Game

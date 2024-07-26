@@ -5,15 +5,17 @@
 #include "Common.hh"
 
 namespace Luna::Game {
-    class CPlayerPed;
 
-    class CPlayerInfo {
-    public:
-        CPlayerPed* PlayerPed;
+class CPlayerPed;
 
-    private:
-        PADDING(0x190);
-    };
+class CPlayerInfo {
+public:
+    CPlayerPed* PlayerPed;
 
-    VALIDATE_SIZE(CPlayerInfo, 0x194);
-}
+private:
+    PADDING(0x190);
+};
+
+VALIDATE_SIZE(CPlayerInfo, 0x194);
+
+} // namespce Luna::Game

@@ -16,11 +16,13 @@
 #include "RW/skeleton.h"
 
 namespace Luna::Game {
-    class CRenderWare {
-    public:
-        static void InitializeLuna();
-    };
-}
+
+class CRenderWare {
+public:
+    static void InitializeLuna();
+};
+
+} // namespce Luna::Game
 
 extern RwGlobals **RwEngineInstance;
 
